@@ -1,82 +1,98 @@
 # Moo-ving Violations: Game Spec Sheet
 
-Last updated Nov 2, 2026. The live, commentable version is the Claude doc: https://claude.ai/artifact/A9UsrixK57gcc51cuhmZVk
+Last updated Nov 4, 2026. The live, commentable version is the Claude doc: https://claude.ai/artifact/A9UsrixK57gcc51cuhmZVk
 
 **Group members:** _add names here_
 
 ## Pitch and story
 
-Moo-ving Violations is a 2–4 player tabletop game where rival alien crews abduct Earth cows, milk them aboard their saucers, and sell the milk at the Galactic Marketplace. Players spend their coins on seeds, plant grass to keep the farms full of cows, and race to become the richest crew before Earth catches on.
+Moo-ving Violations is a single-player digital game where you pilot an alien UFO, abduct Earth cows, milk them aboard your ship, and sell the milk at the Galactic Marketplace. You spend your coins on more cows, flavor upgrades and power-ups, and try to earn the highest score you can across 10 visits without getting caught.
 
-**Story:** Milk is the most valuable substance in the galaxy, and only Earth makes it. Each crew runs a three-step operation: abduct cows on the farm, milk them in the ship, and trade at the Marketplace. Cows only stay on farms with grass, so crews who over-abduct and under-plant end up with empty pastures.
+**Story:** Milk is the most valuable substance in the galaxy, and only Earth makes it. Each visit, you fly over the farms, beam up cows and milk them. Feed a cow the right treat and it turns into a Chocolate cow, then a Strawberry cow, and up the ladder from there, and each flavor's milk sells for more. Every abduction makes the farmers more suspicious. Push your luck too far and you're caught, losing every cow and every drop of milk on board.
 
-**Why it's immersive:** each player has a saucer piece and an alien species card. Cows have names. The table is laid out as three zones that match the whiteboard (Farm, Ship, Marketplace), so players physically move tokens through the system and can see stocks rise and fall.
+**Why it's immersive:** you fly the UFO yourself, and the cows wobble as the beam lifts them. Cows change color as you upgrade them. You can watch your stocks of cows, milk, coins and suspicion rise and fall on screen, and the high-score leaderboard gives players a reason to try again with a better strategy.
 
-## Whiteboard breakdown
+## Game zones
 
-![Whiteboard sketch](whiteboard.jpg)
+![Original whiteboard sketch](whiteboard.jpg)
 
-The whiteboard defines three zones, and each zone is its own set of stocks connected by flows. This table restates it, with the flows written as "+" (into a stock) and "−" (out of a stock).
+The game has three zones, taken from our whiteboard sketch. Seeds and grass from the first sketch are cut: farms no longer grow or breed cows, and the only way to add cows is to buy them.
 
-| Zone | Stocks | Flows (in / out) | Limits |
+| Zone | Stocks | What you do there | Limits |
 | --- | --- | --- | --- |
-| On Farm | Grass, cows | Plant grass: +grass. Cows graze: −grass. Abduct cows: −cows on the farm, +cows in the ship | Cow count (grass feeds only so many), time per round |
-| In Ship | Cows, milk | Abducted cows in: +cows. Milking: +milk. Exile cows: −cows | Pen size, milk tank size |
-| Marketplace | Milk, coins, seeds | Sell milk: −milk, +coins. Buy seeds: −coins, +seeds | Market price, coins on hand |
-
-**How we read "−grass, +cows":** cows eat grass, and grass is what keeps cows on the farm and lets the herd grow. Planting grass raises the grass stock, and grazing drains it. Check this with the group (see Open questions).
+| Farm (during a visit) | Cows on the farms, suspicion | Abduct cows. Drop cows back off at a farm. | Suspicion rises with every abduction. Getting caught at 10 ends the visit. |
+| UFO (during a visit) | Cows in the UFO, milk on board | Upgrade a cow's flavor (costs coins). Milk rested cows. | UFO holds a limited number of cows. Cows must rest before milking. |
+| Marketplace (between visits) | Milk listings, coins, cows for sale, power-ups | List milk for sale. Buy cows to drop at the farms. Buy power-ups. Let suspicion cool down. | Coins on hand. Milk spoils if it doesn't sell in time. |
 
 ## Core loop
 
 ```mermaid
 flowchart LR
   subgraph Farm["On Farm"]
-    Grass["Grass<br/>6 per farm to start"] -- feeds --> Cows["Cows on farm<br/>16 to start, shared"]
+    Cows["Cows on farms<br/>12 to start, no breeding"] -- raises --> Sus["Suspicion<br/>Caught at 10"]
   end
-  subgraph Ship["In Ship"]
-    Pen["Cows in pen<br/>Holds 3 cows"] -- milking --> Milk["Milk<br/>Max 10 gal, spoils"]
+  subgraph UFO["In the UFO"]
+    UCows["Cows in UFO<br/>Rest, then upgrade"] -- milking --> Milk["Milk on board<br/>Flavor sets the price"]
   end
   subgraph Market["Marketplace"]
-    Coins["Coins<br/>Your score"] -- buy --> Seeds["Seeds<br/>2 coins each"]
+    List["Milk listings<br/>Spoils if unsold"] -- aliens buy --> Coins["Coins<br/>Your score"]
   end
-  Cows -- abduct --> Pen
-  Milk -- sell --> Coins
-  Seeds == "Reinforcing loop: plant seeds (grass sprouts next round)" ==> Grass
+  Cows -- abduct --> UCows
+  UCows -- drop off --> Cows
+  Milk -- list --> List
+  Coins == "buy new cows" ==> Cows
+  Coins == "flavor upgrades" ==> UCows
 ```
 
-Cows move left to right through the three zones and become coins. Coins come back around as seeds, which grow the grass that keeps cows on the farm. A player who never reinvests drains the shared herd.
+Cows move left to right and become coins. Coins come back as new cows and flavor upgrades, so each visit can earn more than the last. Suspicion is the brake: every abduction raises it, and reaching 10 costs you everything in the UFO.
 
 ## Stocks, flows and starting values
 
-These are first-draft numbers for the playtest on 11/23. Expect to tune them after one or two test games.
+All numbers here are placeholders for the team to tune during playtesting.
 
 **Stocks**
 
-| Stock | Zone | Shared or per player | Starts at | Max |
-| --- | --- | --- | --- | --- |
-| Grass | Farm | Shared, tracked per farm (4 farms) | 6 per farm | 10 per farm |
-| Cows on farm | Farm | Shared, per farm | 4 per farm (16 total) | Limited by grass |
-| Cows in pen | Ship | Per player | 0 | 3 (upgradable) |
-| Milk | Ship | Per player | 0 gal | 10 gal (upgradable) |
-| Coins | Marketplace | Per player | 10 | None |
-| Seeds | Marketplace | Per player | 2 | None |
-| Action points | All | Per player, per round | 3 | 3 |
+| Stock | Zone | Starts at | Limit |
+| --- | --- | --- | --- |
+| Cows on the farms | Farm | 12 Regular cows across 4 farms | None, but no new cows appear on their own |
+| Cows in the UFO | UFO | 0 | 3 (raised by the Bigger UFO power-up) |
+| Milk on board | UFO | 0 gal | None |
+| Milk listings | Marketplace | 0 gal | None |
+| Coins | Marketplace | 50 | None. This is your score. |
+| Suspicion | All | 0 | 10 = caught |
+| Visits left | All | 10 | Game ends after visit 10 |
+| Power-up levels | Marketplace | All at level 0 | Level 3 for now (more can be added) |
 
 **Flows**
 
-| Flow | Moves | Rate | Rule |
+| Flow | Moves | Rate (placeholder) | Rule |
 | --- | --- | --- | --- |
-| Plant grass | Seeds → grass | 1 seed = +3 grass | Costs 1 action. Grass sprouts next round (delay). |
-| Natural regrowth | Into grass | +1 grass per farm per round | Automatic at end of round |
-| Grazing | Out of grass | −1 grass per cow per round | Automatic at end of round |
-| Breeding | Into cows on farm | +1 calf per farm per round | Only if the farm has 2+ cows and grass ≥ cows |
-| Wandering off | Out of cows on farm | Cows above the grass count leave | Happens when a farm runs out of grass |
-| Abduct | Farm cows → pen | 1 cow per action | Roll to succeed (see Suspicion) |
-| Milk | Pen cows → milk | +2 gal per rested cow | Cows rest 1 round after abduction (delay) |
-| Exile | Out of pen | Cow leaves the game | Frees pen space. Optional: return it to a farm instead. |
-| Sell milk | Milk → coins | Market price per gallon (starts at 3) | Price drops as more milk is sold (see Additions) |
-| Buy seeds | Coins → seeds | 2 coins per seed | Costs 1 action |
-| Spoilage | Out of milk | Milk older than 2 rounds spoils | Track milk age with a marker |
+| Abduct | Farm cows → UFO | 1 cow at a time | Raises suspicion. A farmer may spot you and make you drop the cow. |
+| Rest | Inside the UFO | 20 seconds after abduction | A cow must rest before it can be milked |
+| Upgrade | Cow flavor → next flavor | Costs coins (see Cow flavors) | Done in the UFO, one step at a time |
+| Milk | Rested cow → milk on board | 2 gal per milking | Each cow can be milked once per visit. Milk takes the cow's current flavor. |
+| Drop off | UFO → farm cows | 1 cow at a time | Upgraded cows keep their new flavor on the farm |
+| List | Milk on board → milk listings | All milk at once | Happens at the Marketplace after you end a visit |
+| Sell | Milk listings → coins | Aliens buy at random | Coins go straight into your balance. Price is fixed per flavor. |
+| Spoil | Out of milk listings | After a set number of visits | Spoiled milk can't be sold, so its value is lost |
+| Buy cows | Coins → farm cows | 40 coins per Regular cow | Bought cows are dropped off at a farm on your next visit |
+| Buy power-ups | Coins → power-up level | See Power-ups | Permanent once bought |
+| Suspicion gain | Into suspicion | +1 per abduction, more in later visits | See Suspicion and getting caught |
+| Cool-down | Out of suspicion | Falls to 0 over 30 seconds at the Marketplace | Leave early and you keep the rest |
+
+## Cow flavors
+
+Every abducted cow starts as Regular. You upgrade it one step at a time in the UFO, milk it for that flavor's milk, then drop it back at the farm as the new flavor. Better milk sells for more but spoils faster. The ladder is designed so we can add more flavors later.
+
+| Flavor | Upgrades from | Upgrade cost | Milk price | Milk spoils after |
+| --- | --- | --- | --- | --- |
+| Regular | Starting flavor | Free | 10 coins/gal | 5 visits |
+| Chocolate | Regular | 50 coins | 20 coins/gal | 4 visits |
+| Strawberry (pink) | Chocolate | 120 coins | 35 coins/gal | 3 visits |
+| Almond | Strawberry | 250 coins | 60 coins/gal | 2 visits |
+| Donut | Almond | 500 coins | 100 coins/gal | 1 visit |
+
+**Upgrade rules:** a cow can't skip a flavor, so Regular to Strawberry takes two upgrades. A rested cow can be upgraded and milked in the same visit, and the milk comes out as the new flavor.
 
 ## Loops, delays and constraints
 
@@ -84,120 +100,106 @@ The game covers every concept from class so far. The table maps each one to the 
 
 | Course concept | Where it shows up in the game |
 | --- | --- |
-| Stocks | Grass, cows on farm, cows in pen, milk, coins, seeds |
-| Flows | Plant, graze, breed, abduct, milk, exile, sell, buy (see the flows table) |
-| Reinforcing loop: profit engine | More coins buy more seeds, which grow more grass, which supports more cows, which make more milk and more coins |
-| Reinforcing loop: herd growth | Cows on a well-fed farm breed calves, and more cows breed faster |
-| Balancing loop: grazing | More cows eat more grass. When grass runs out, cows wander off and the herd shrinks back to what the grass can support. |
-| Balancing loop: market price | Selling lots of milk drops the price, so flooding the market earns less per gallon |
-| Balancing loop: suspicion | Each abduction raises suspicion, which makes the next abduction harder |
-| Delays | Grass sprouts 1 round after planting. Cows rest 1 round before milking. Suspicion updates at the end of the round. The market price recovers slowly. |
-| Limits and constraints | 3 action points per round (time). Pen holds 3 cows. Tank holds 10 gal. Grass caps the cow count. Coins cap what you can buy. |
-| Components and relationships | Players, saucers, farms, cows, grass, the Marketplace, and the rules that connect them |
+| Stocks | Cows on the farms, cows in the UFO, milk on board, milk listings, coins, suspicion |
+| Flows | Abduct, rest, upgrade, milk, drop off, list, sell, spoil, buy cows, buy power-ups, suspicion gain and cool-down |
+| Reinforcing loop: flavor engine | Coins pay for flavor upgrades, upgraded cows make pricier milk, and pricier milk brings in more coins for the next upgrade |
+| Reinforcing loop: herd and ship growth | Coins buy more cows and a bigger UFO, which means more milk per visit and more coins |
+| Balancing loop: suspicion | Each abduction raises suspicion. As it climbs, getting caught becomes likely, so the player ends the visit and lets it cool down. |
+| Balancing loop: spoilage | Better milk is worth more but spoils faster, which limits how much expensive milk you can stockpile |
+| Delays | Cows rest before milking. Aliens buy listed milk at random, so coins arrive later. Suspicion takes 30 seconds at the Marketplace to fall to 0. |
+| Limits and constraints | UFO cow capacity, the suspicion cap of 10, 10 visits per game, coins on hand, and the fixed herd (cows only increase when you buy them) |
+| Components and relationships | The UFO, cows, farmers, alien buyers, the Marketplace, and the rules that connect them |
 | System diagram | The core loop diagram in this spec |
 
-**The main tension:** abducting cows is the fastest way to make money, but every cow you take is one less cow breeding on the farm. Players have to reinvest in seeds and grass, or the shared herd collapses for everyone.
+**The main tension:** staying longer on a visit means more cows and more milk, but every abduction pushes suspicion closer to 10. Getting caught wipes out everything in the UFO, so the player has to decide when to stop and head to the Marketplace.
 
-## Format, rounds and winning
+## Format, visits and scoring
 
-The game runs 10 rounds of about 3 minutes each, so a full game takes 30–40 minutes.
+The game is single player and lasts 10 visits to Earth. There is no win screen: your score is the coins you have after visit 10, and players compete for the top spot on a high-score leaderboard.
 
-**Format**
+**How a visit works**
 
-- **Main mode, 2–4 player free-for-all:** each player is a rival alien crew sharing the same 4 farms.
-- **Optional 3v1 mode:** one player is the Farmer. They spend their own coins on fences, guard dogs and scarecrows that make abductions harder, and they win if the herd survives with 8+ cows.
+1. **Fly in.** Your UFO arrives over the farms with whatever suspicion you carried over from last time.
+2. **Abduct.** Hold the beam over a cow to lift it into the UFO. Each abduction raises suspicion, and a farmer may spot you and make you drop the cow.
+3. **Work the UFO.** Rested cows can be upgraded (for coins) and milked. Drop cows back at any farm to free up space.
+4. **End the visit.** Press End Visit whenever you choose. There is no timer during a visit.
+5. **Marketplace.** The screen changes to the Marketplace. List your milk, buy cows and power-ups. Suspicion falls to 0 over 30 seconds while you're there.
+6. **Next visit.** Leave whenever you're ready. If you leave before 30 seconds, you carry the leftover suspicion into the next visit.
 
-**Round structure** (each player has 3 action points per round)
+**Suspicion and getting caught**
 
-1. **Farm phase:** in turn order, players spend actions. Abduct a cow (1 action, roll to succeed) or plant 1 seed on any farm (1 action).
-2. **Ship phase:** milk every rested cow (free, +2 gal each). Exile any cows you no longer want (free).
-3. **Marketplace phase:** sell any amount of milk at the current price (free). Buy seeds or upgrades (1 action each purchase).
-4. **Earth upkeep:** new grass sprouts, cows graze, farms regrow and breed, hungry cows wander off, suspicion updates, milk ages, and the market price recovers by 1. Flip an event card for next round.
+Suspicion runs from 0 to 10 and carries over between visits. It rises with every abduction, and the game gets harder as it goes on.
+
+| Visits | Suspicion per abduction | Chance a farmer spots you |
+| --- | --- | --- |
+| 1–3 | +1 | 10% |
+| 4–6 | +2 | 20% |
+| 7–10 | +3 | 30% |
+
+If a farmer spots you, the cow drops and suspicion goes up by an extra +1. If suspicion reaches 10, you're caught: you lose every cow and all the milk in the UFO, the visit ends, and you're sent straight to the Marketplace. The game keeps going, so getting caught costs you but never ends your run. Milk you already listed and coins you already earned are safe.
 
 **Game stages**
 
-- **Early game (rounds 1–3): land grab.** Farms are full and suspicion is low. Players abduct heavily and build up milk.
-- **Mid game (rounds 4–7): the squeeze.** Grass is running low on popular farms, the market price is falling, and suspicion is climbing. Players who bought seeds early pull ahead.
-- **Late game (rounds 8–10): cash out.** Players race to sell before the game ends. High suspicion makes every abduction risky.
-
-**How to win**
-
-- The player with the most coins after round 10 wins. Unsold milk and seeds are worth nothing.
-- If suspicion reaches 10, the military arrives and the game ends immediately. The richest player still wins, but nobody gets a final sell phase.
-- If the shared herd drops to 0 cows, every player loses.
+- **Early game (visits 1–3): build the herd.** Suspicion rises slowly. Abduct freely, milk Regular cows and buy your first upgrades.
+- **Mid game (visits 4–6): climb the ladder.** Suspicion rises faster. Players push cows to Chocolate and Strawberry and buy power-ups.
+- **Late game (visits 7–10): high stakes.** Every abduction is risky. Players with stealth power-ups and high-flavor cows earn the most per visit.
 
 **Strategies we expect to see**
 
-- **Rancher:** plants a lot of grass and takes only a few cows each round. Slow, but it keeps the engine running.
-- **Raider:** abducts as much as possible early and sells before the price drops.
-- **Market timer:** holds milk until other players have sold and the price has recovered. Risks spoilage.
-- **Free rider:** lets other players plant grass, then abducts from their farms.
+- **Flavor climber:** keeps a few cows and upgrades them as high as possible for the most valuable milk.
+- **Herd builder:** buys lots of Regular cows and a bigger UFO for steady volume.
+- **Ghost:** invests in stealth early so they can stay longer on later visits.
+- **Risk taker:** abducts until suspicion is close to 10 every visit, accepting the occasional loss.
 
-## Additions beyond the whiteboard
+## Power-ups
 
-These ideas add depth and more systems concepts. Pick the ones the group likes; the first three matter most.
+At the Marketplace, players can spend coins on power-ups such as a bigger UFO, a milk booster, a cloaking device and faster milking. Power-ups are permanent once bought, and each one can be upgraded through several levels. We plan to add more power-ups as development goes on.
 
-**1. Suspicion meter (balancing loop + delay).** A shared track from 0 to 10. Each abduction adds +1 at the end of the round. Abduction rolls get harder as suspicion rises: on a d6 you need 2+ at suspicion 0–3, 3+ at 4–6, and 5+ at 7–9. A failed roll adds another +1. A round with no abductions at all lowers suspicion by 1.
+| Power-up | What each level does | Level 1 | Level 2 | Level 3 |
+| --- | --- | --- | --- | --- |
+| Bigger UFO | +2 cow capacity (3 → 5 → 7 → 9) | 100 coins | 250 coins | 500 coins |
+| Milk Booster | +1 gal per milking (2 → 3 → 4 → 5) | 200 coins | 450 coins | 900 coins |
+| Cloaking Device | 20% less suspicion per abduction | 150 coins | 350 coins | 700 coins |
+| Faster Milking | Cows rest 5 seconds less before milking (20 → 15 → 10 → 5) | 75 coins | 200 coins | 450 coins |
 
-**2. Market price that reacts (balancing loop).** The Marketplace has a price track that starts at 3 coins per gallon. Every 4 gallons sold by anyone drops the price by 1 (minimum 1). It recovers by 1 each round (maximum 5). This punishes everyone dumping milk at once.
+All costs and effects are placeholders. Level 3 is the cap for now, and more levels can be added if the numbers feel right in playtesting.
 
-**3. Upgrades (reinforcing loop).** Players can spend coins at the Marketplace to grow their operation.
+## Screens, assets, open questions and build plan
 
-| Upgrade | Cost | Effect |
-| --- | --- | --- |
-| Bigger pen | 8 coins | Pen holds 5 cows |
-| Milk tank expansion | 6 coins | Tank holds 16 gal |
-| Tractor beam booster | 10 coins | +1 to abduction rolls |
-| Auto-milker | 12 coins | Each rested cow gives 3 gal instead of 2 |
-| Cloaking device | 10 coins | Your abductions add no suspicion for 1 round (single use) |
+The game is digital and builds on our browser demo. One teammate is already making the art assets.
 
-**4. Cow types.** Draw a cow card when you abduct. Most are regular cows (2 gal). Jersey cows give 3 gal. Highland cows give 1 gal but sell to the Marketplace as "exotic" for 6 coins. A Bull gives no milk and must be exiled.
+**Screens**
 
-**5. Event cards (one flipped each round).**
+| Screen | What's on it |
+| --- | --- |
+| Farm visit | Night sky, 4 farms with cows, the UFO and its beam, farmers, suspicion meter, cows in the UFO, End Visit button |
+| Marketplace | Milk listings and alien buyers, cow shop, power-up shop, coin balance, suspicion cool-down |
+| Game over | Final coins and the high-score leaderboard |
 
-- Full moon: abductions add +2 suspicion this round.
-- Drought: no natural grass regrowth this round.
-- Galactic milk shortage: milk sells for double this round.
-- Seed sale: seeds cost 1 coin this round.
-- Conspiracy podcast: suspicion +1.
-- Crop circle craze: suspicion −1, but abduction rolls are 1 harder.
-- Rainy season: every farm gets +2 grass.
+**Art assets**
 
-**6. Alien species cards.** Each player picks a species with one perk, such as Zorblaxians (+1 action on round 1), Moolians (milk spoils after 3 rounds instead of 2) or Grassoids (seeds give +4 grass).
-
-## Components, open questions and build plan
-
-**Components to build**
-
-| Item | Quantity | Notes |
-| --- | --- | --- |
-| Game board | 1 | Three zones: 4 farms, a ship dock per player, the Marketplace with price track and suspicion track |
-| Cow tokens or minis | 30 | Toy cows, painted beads or cardboard |
-| Grass tokens | 40 | Green chips or felt squares |
-| Milk tokens | 40 | White chips, 1 per gallon |
-| Coins | 100 | Play money or poker chips |
-| Seed tokens | 20 | Small beads |
-| Saucer pieces | 4 | One per player |
-| Player ship mats | 4 | Pen slots, milk tank, action point tracker |
-| Cow cards | 30 | If we use cow types |
-| Event cards | 15 | |
-| Species cards | 4–6 | |
-| Six-sided dice | 4 | For abduction rolls |
-| Rules sheet | 1 per player | One page |
+| Asset | Notes |
+| --- | --- |
+| UFO | Base ship, plus a look for each Bigger UFO level if time allows |
+| Cows | One sprite per flavor: Regular, Chocolate, Strawberry (pink), Almond, Donut |
+| Milk bottles | One per flavor, plus a spoiled look |
+| Farmers | Idle and "spotted you" poses |
+| Alien buyers | A few shopper designs for the Marketplace |
+| Farm scene | Barns, fences, fields, night sky |
+| UI | Suspicion meter, coin counter, power-up icons, buttons |
 
 **Open questions for the group**
 
-- [ ] Does "−grass" mean cows eat grass (our reading), or that planting costs grass?
-- [ ] What does the "3" in the corner of the farm sketch mean: 3 action points, a 3-minute timer, or 3 cows?
-- [ ] Is "time" a real-time timer per round, a fixed number of rounds, or both?
-- [ ] Does an exiled cow leave the game, or go back to a farm?
-- [ ] Free-for-all only, or also build the 3v1 Farmer mode?
-- [ ] Which additions do we keep for the first playtest?
+- [ ] How often do aliens buy listed milk? For example, a random sale every few seconds at the Marketplace, or a share of listings each visit.
+- [ ] Does milk still on board the UFO (not yet listed) count toward spoilage?
+- [ ] Where do bought cows go: straight onto a farm, or into the UFO to be dropped off on the next visit?
+- [ ] Is the leaderboard saved on one computer only, or shared online?
+- [ ] Final placeholder numbers: milk prices, upgrade costs, cow price, power-up costs, suspicion per abduction.
 
 **Build plan**
 
 - [ ] Submit this proposal by Thu Nov 5 at 10am (every member submits a copy)
-- [ ] Draw the system diagram and finalize rules: week of Nov 9
-- [ ] Build a rough prototype and run one practice game inside the group: week of Nov 16
+- [ ] Week of Nov 9: playable visit loop (abduct, upgrade, milk, drop off, suspicion, getting caught)
+- [ ] Week of Nov 16: Marketplace screen, cow flavors, power-ups, and the first art assets swapped in
 - [ ] In-class playtest on Mon Nov 23 and Tue Nov 24, then tune numbers from feedback
 - [ ] Final production play on Thu Dec 3
