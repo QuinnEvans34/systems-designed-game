@@ -109,7 +109,7 @@ The game covers every concept from class so far. The table maps each one to the 
 
 ## Format, visits and scoring
 
-The game is single player and lasts 10 visits to Earth. There is no win screen: your score is the coins you have after visit 10, and players compete for the top spot on a high-score leaderboard.
+The game is single player (approved by our professor) and lasts 10 visits to Earth. There is no win screen: your score is the coins you have after visit 10, and players compete for the top spot on a high-score leaderboard.
 
 **How a visit works**
 
@@ -160,7 +160,7 @@ All costs and effects are placeholders. Level 3 is the cap for now, and more lev
 
 ## Screens, assets, open questions and build plan
 
-The game is digital and builds on our browser demo. Ted Roper is making the art assets.
+The game is digital and builds on our browser demo. It runs in a web browser, so classmates can play it on their laptops at the in-class playtest and the final production play. Ted Roper is making the art assets.
 
 **Screens**
 
@@ -192,7 +192,7 @@ The game is digital and builds on our browser demo. Ted Roper is making the art 
 
 **Build plan**
 
-- [ ] Submit this proposal by Thu Nov 5 at 10am (every member submits a copy)
+- [ ] Submit this proposal by Thu Nov 5 at 11:59pm (every member submits a copy with all names)
 - [ ] Week of Nov 9: playable visit loop (abduct, upgrade, milk, drop off, suspicion, getting caught)
 - [ ] Week of Nov 16: Marketplace screen, cow flavors, power-ups, and the first art assets swapped in
 - [ ] In-class playtest on Mon Nov 23 and Tue Nov 24, then tune numbers from feedback

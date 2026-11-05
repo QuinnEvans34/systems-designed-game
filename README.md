@@ -24,7 +24,7 @@ The demo is an early prototype. It still uses nights and fuel and doesn't have c
 
 | Date | Milestone |
 | --- | --- |
-| Thu Nov 5, 10am | Project Proposal Part I due (every member submits a copy with all names) |
+| Thu Nov 5, 11:59pm | Project Proposal Part I due (every member submits a copy with all names) |
 | Mon Nov 23 and Tue Nov 24 | In-class playtest |
 | Thu Dec 3 | Final production play |
 
