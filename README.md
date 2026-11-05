@@ -38,4 +38,4 @@ Open questions and to-dos live at the bottom of the spec sheet. Use GitHub Issue
 
 ## Team
 
-_Add names here._
+Ted Roper (art assets), Porter Johnson, Gracie Jarret, Landen Schmidt, Quinn Evans

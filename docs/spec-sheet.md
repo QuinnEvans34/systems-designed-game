@@ -1,8 +1,6 @@
 # Moo-ving Violations: Game Spec Sheet
 
-Last updated Nov 4, 2026. The live, commentable version is the Claude doc: https://claude.ai/artifact/A9UsrixK57gcc51cuhmZVk
-
-**Group members:** _add names here_
+**Group members:** Ted Roper, Porter Johnson, Gracie Jarret, Landen Schmidt, Quinn Evans
 
 ## Pitch and story
 
@@ -13,10 +11,6 @@ Moo-ving Violations is a single-player digital game where you pilot an alien UFO
 **Why it's immersive:** you fly the UFO yourself, and the cows wobble as the beam lifts them. Cows change color as you upgrade them. You can watch your stocks of cows, milk, coins and suspicion rise and fall on screen, and the high-score leaderboard gives players a reason to try again with a better strategy.
 
 ## Game zones
-
-![Original whiteboard sketch](whiteboard.jpg)
-
-The game has three zones, taken from our whiteboard sketch. Seeds and grass from the first sketch are cut: farms no longer grow or breed cows, and the only way to add cows is to buy them.
 
 | Zone | Stocks | What you do there | Limits |
 | --- | --- | --- | --- |
@@ -166,7 +160,7 @@ All costs and effects are placeholders. Level 3 is the cap for now, and more lev
 
 ## Screens, assets, open questions and build plan
 
-The game is digital and builds on our browser demo. One teammate is already making the art assets.
+The game is digital and builds on our browser demo. Ted Roper is making the art assets.
 
 **Screens**
 
