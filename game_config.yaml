@@ -1,0 +1,164 @@
+# =====================================================================
+#  Moo-ving Violations: game settings
+# =====================================================================
+#  Edit any number or name below, save, then refresh the game.
+#
+#  How changes reach the game:
+#    • Playing with `npm start`: the server picks up your edits as soon as
+#      you save this file. Just refresh the browser.
+#    • Opening index.html directly: run `npm run config` first. It turns this
+#      file into game/config.js, which the page loads.
+#
+#  Rules for editing:
+#    • Indent with spaces (not tabs). Keep the indentation the same.
+#    • Don't rename the keys that start a section (like `base:`, `milkTime:`,
+#      or `chocolateBar:`). The game uses them to find art and logic.
+#      Change the values after the colon.
+#    • Text with special characters (: # emoji) goes in "double quotes".
+#    • Saved games keep their progress. To see new *starting* values, use
+#      ☰ menu → "Start completely over".
+#
+#  "design doc" in a comment = the value from the game design document.
+# =====================================================================
+
+start:
+  coins: 0                 # coins you begin with
+  cows: 1                  # cows waiting in the field (they are the first cow type below)
+
+herd:
+  max_cows: 20             # most cows you can own in total (field + ship). design doc: 20
+  new_cow_price: 15        # cost of a new base cow at the right market stand
+  rest_seconds: 30         # how long an exhausted cow lies down in the field
+
+# ---------------------------------------------------------------------
+#  Cows and their milk. Each milking gives one bottle.
+#  The order here is the upgrade order (first = the cow you start with).
+# ---------------------------------------------------------------------
+cows:
+  base:
+    name: Base cow
+    milk: Milk
+    milk_price: 5          # coins per bottle. design doc: 5
+  chocolate:
+    name: Chocolate cow
+    milk: Chocolate milk
+    milk_price: 15         # design doc: 15
+  strawberry:
+    name: Strawberry cow
+    milk: Strawberry milk
+    milk_price: 30         # design doc: 30
+  doughnut:
+    name: Doughnut cow
+    milk: Coffee
+    milk_price: 65         # design doc: 65
+  almond:
+    name: Almond cow
+    milk: Almond milk
+    milk_price: 150        # design doc: 150
+
+# ---------------------------------------------------------------------
+#  Cow upgrade items (right market stand). Drag one onto a cow aboard
+#  the ship. `turns` = the cow it works on, `into` = what it becomes.
+# ---------------------------------------------------------------------
+upgrade_items:
+  chocolateBar:
+    name: Chocolate bar
+    icon: "🍫"
+    turns: base
+    into: chocolate
+    cost: 20               # design doc: 20
+  strawberry:
+    name: Strawberry
+    icon: "🍓"
+    turns: chocolate
+    into: strawberry
+    cost: 50               # design doc: 50
+  latteCup:
+    name: Latte cup
+    icon: "☕"
+    turns: strawberry
+    into: doughnut
+    cost: 75               # design doc: 75
+  almond:
+    name: Almond
+    icon: "🌰"
+    turns: doughnut
+    into: almond
+    cost: 120              # design doc: 120
+
+# ---------------------------------------------------------------------
+#  Ship upgrades (middle market stand).
+#
+#    start            value before any upgrades
+#    change           "add" (start + amount × level)
+#                     or "multiply" (start × amount ^ level)
+#    amount           how much each level adds, or the multiplier
+#    round            "whole", "tenth" or "none" (rounding for the shown value)
+#    min              lowest the value can go (optional)
+#    cost             price of the first level
+#    cost_multiplier  each level costs this much more (×). Costs are rounded.
+#    max_level        how many times it can be bought
+# ---------------------------------------------------------------------
+ship_upgrades:
+  milkTime:
+    name: Milking time
+    description: The milker works faster each level.
+    unit: s
+    start: 15              # seconds. design doc: 15
+    change: add
+    amount: -3             # design doc: -3 s
+    round: whole
+    min: 1
+    cost: 5                # design doc: 5
+    cost_multiplier: 1.3   # design doc: ×1.3
+    max_level: 4
+
+  cowCap:
+    name: Ship cow capacity
+    description: Room for more cows aboard.
+    unit: cows
+    start: 3               # design doc: 3
+    change: add
+    amount: 1              # design doc: +1
+    round: whole
+    cost: 20               # design doc: 20
+    cost_multiplier: 1.5   # design doc: ×1.5
+    max_level: 7
+
+  bottleCap:
+    name: Ship bottle capacity
+    description: Store more bottles of milk.
+    unit: bottles
+    start: 5               # design doc: 5
+    change: multiply
+    amount: 1.5            # design doc: ×1.5 (rounded)
+    round: whole
+    cost: 10               # design doc: 10
+    cost_multiplier: 1.3   # design doc: ×1.3
+    max_level: 8
+
+  stealth:
+    name: Ship stealth
+    description: Each beam raises Earth's suspicion less.
+    unit: ""
+    start: 10              # design doc: 10
+    change: multiply
+    amount: 1.5            # design doc: ×1.5
+    round: tenth
+    cost: 20               # design doc: 20
+    cost_multiplier: 1.8   # design doc: ×1.8
+    max_level: 6
+
+# ---------------------------------------------------------------------
+#  Suspicion (the meter in the field)
+# ---------------------------------------------------------------------
+suspicion:
+  per_beam: 250            # each beam adds per_beam ÷ stealth (250 ÷ 10 = 25)
+  limit: 100               # a beam that would go past this is blocked
+  cooldown_per_second: 1.5 # how fast suspicion drops
+
+# ---------------------------------------------------------------------
+#  Time
+# ---------------------------------------------------------------------
+time:
+  offline_hours: 4         # most time simulated while the game is closed

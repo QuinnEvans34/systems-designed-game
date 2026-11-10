@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#28372b">
+  <meta name="description" content="A tiny alien, a big dairy dream. Beam up cows, milk them aboard your saucer and sell the milk at the Galactic Marketplace.">
+  <title>Moo-ving Violations · A little alien dairy</title>
+  <link rel="icon" href="assets/Star.png">
+  <link rel="preload" href="assets/InShipBg-return-chute.png" as="image">
+  <link rel="preload" href="assets/ui/wayfarer-pixel.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/scenery/market-painted.png" as="image">
+  <link rel="preload" href="assets/UISpriteSheet.png" as="image">
+  <link rel="preload" href="assets/sprites/cow-base.png" as="image">
+  <link rel="preload" href="assets/sprites/cow-chocolate.png" as="image">
+  <link rel="preload" href="assets/sprites/cow-strawberry.png" as="image">
+  <link rel="preload" href="assets/sprites/cow-doughnut.png" as="image">
+  <link rel="preload" href="assets/sprites/cow-almond.png" as="image">
+  <link rel="stylesheet" href="game/style.css">
+  <script defer src="game/config.js"></script>
+  <script defer src="game/engine.js"></script>
+  <script defer src="game/field-animation.js"></script>
+  <script defer src="game/scenery.js"></script>
+  <script defer src="game/app.js"></script>
+</head>
+<body>
+  <main id="world" class="world farm intro" aria-label="Moo-ving Violations game world">
+    <div class="scene-backdrop" aria-hidden="true"></div>
+
+    <!-- The stage keeps the background art's 1672×941 shape, so everything inside lines up with the painting. -->
+    <div id="stage" class="stage">
+      <section id="farm-scene" class="scene farm-scene" aria-label="Earth field. Move the UFO with the mouse or arrow keys; click or press Space to beam up the cow below.">
+        <canvas id="farm-scenery" class="scenery" width="1672" height="941" aria-hidden="true"></canvas>
+        <div id="ufo" class="ufo" aria-hidden="true">
+          <div class="beam" id="beam"><i class="beam-ring"></i></div>
+          <div class="saucer sprite sprite-ufo"></div>
+        </div>
+        <div id="field-cows" class="field-cows" aria-hidden="true"></div>
+        <canvas id="farm-foreground" class="scenery farm-foreground" width="1672" height="941" aria-hidden="true"></canvas>
+        <div id="farm-tag" class="target-tag" hidden></div>
+      </section>
+
+      <section id="ship-scene" class="scene ship-scene" aria-label="Inside your saucer" hidden>
+        <canvas id="ship-scenery" class="scenery" width="1672" height="941" aria-hidden="true"></canvas>
+        <div class="ship-window" aria-hidden="true"><div id="mini-pod" class="mini-pod"></div></div>
+        <button id="cow-monitor" class="cow-monitor hotspot" data-action="cow-storage" aria-label="Open cow storage on the ship computer" title="Open cow storage"><span class="monitor-label">COW STORAGE <strong id="monitor-count">0/3</strong></span><span id="monitor-pips" class="monitor-pips" aria-hidden="true"></span></button>
+        <div id="pad" class="pad" data-drop="pad"><span class="pad-hint" id="pad-hint">Click a cow (or drag it here) to put it on the milking pad</span></div>
+        <div id="pad-cow" class="pad-cow" data-drop="pad"></div>
+        <div class="teleport-effects" id="teleport-effects" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="status-podium" id="status-podium">
+          <div class="podium-screen"><span class="podium-heading">PAD CONTROL</span><b id="pad-name">NO COW LINKED</b><small id="pad-status">Select a cow below</small><span class="podium-meter"><i id="podium-fill"></i></span></div>
+          <div class="podium-controls"><button data-action="unpad" id="store-cow" aria-label="Teleport cow to storage" title="Teleport to storage">↩</button><button data-action="pod" id="return-cow" aria-label="Send cow home through the chute" title="Send home">↓</button></div>
+        </div>
+        <div id="milker" class="milker" aria-hidden="true">
+          <div class="milker-box"><span class="milker-lamp"></span><span class="milker-name">MOO-MATIC 3000</span><span class="milker-progress"><i id="milker-fill"></i></span></div>
+          <div id="steam" class="steam"></div>
+        </div>
+        <button id="milk-button" class="milk-button sprite sprite-milk" data-action="milk" aria-label="Milk the cow on the pad"></button>
+        <div id="pod" class="pod" data-drop="pod">
+          <button class="pod-body" data-action="pod" aria-label="Return chute: send the cow on the pad home"><span class="chute-passenger" id="chute-passenger" aria-hidden="true"></span></button>
+        </div>
+        <div class="storage-console" data-drop="storage"><div class="console-header"><span><i></i> COW TELEPORT CONTROL</span><small>DRAG TO PAD · CLICK TO LINK</small></div><div id="ship-storage" class="ship-storage" data-drop="storage" aria-label="Cow teleport selection panel"></div><span id="storage-empty" class="storage-empty">NO COWS IN STORAGE</span></div>
+      </section>
+
+      <section id="market-scene" class="scene market-scene" aria-label="Galactic marketplace" hidden>
+        <canvas id="market-scenery" class="scenery" width="1672" height="941" aria-hidden="true"></canvas>
+        <div id="cats" class="cats" aria-hidden="true"></div>
+        <button class="stand stand-sell" data-action="stand" data-value="sell" aria-label="Milk stand: sell milk"></button>
+        <button class="stand stand-ship" data-action="stand" data-value="ship" aria-label="Ship upgrades stand"></button>
+        <button class="stand stand-cows" data-action="stand" data-value="cows" aria-label="Cow stand: buy cows and cow upgrade items"></button>
+      </section>
+    </div>
+
+    <div class="rotate-tip" aria-hidden="true">↻ Turn your phone sideways for a bigger view</div>
+
+    <h1 id="location-title" class="sr-only">The Field</h1>
+    <span id="location-subtitle" class="sr-only">A little alien. A big dairy dream.</span>
+
+    <div class="pocket supplies-hud" id="supplies-hud" aria-label="Your supplies" hidden>
+      <span class="coin-token" aria-hidden="true"></span><strong id="coins">0</strong><small>coins</small>
+      <span class="pocket-divider"></span>
+      <span class="bottle-token" aria-hidden="true"></span><strong id="bottles">0/5</strong><small>milk</small>
+    </div>
+
+    <nav id="travel" class="travel-signpost" aria-label="Travel between scenes" hidden>
+      <button data-action="travel" data-value="farm" aria-current="location"><span>1</span> Field</button>
+      <button data-action="travel" data-value="ship"><span>2</span> Ship</button>
+      <button data-action="travel" data-value="market"><span>3</span> Market</button>
+    </nav>
+
+    <div class="hud-right" id="hud-right" hidden>
+      <button class="inventory-button sprite sprite-inventory" data-action="inventory" aria-label="Open inventory (I)" title="Inventory (I)"></button>
+      <button class="menu-button" data-action="menu" aria-label="Open field guide and settings" title="Field guide and settings">☰</button>
+    </div>
+
+    <div class="suspicion" id="suspicion" hidden>
+      <div class="sprite sprite-susp"><i id="susp-mask" class="susp-mask"></i></div>
+      <small id="susp-text">All clear</small>
+    </div>
+
+    <div id="guide" class="guide" hidden><button class="alien-portrait" data-action="toggle-guide" aria-label="Show or hide Miso's tips" title="Hide tips"></button><div class="speech"><span>MISO / YOUR CO-PILOT</span><p id="guide-text" aria-live="polite"></p><button class="tutorial-skip" data-action="finish-tutorial">Skip tutorial</button></div></div>
+    <div id="world-toast" class="world-toast" role="status" hidden></div>
+    <div id="float-layer" class="float-layer" aria-hidden="true"></div>
+    <span class="save-mark" id="save-mark" hidden>● Saved on this device</span>
+
+    <section id="welcome" class="welcome" aria-labelledby="welcome-title">
+      <span class="welcome-eyebrow">A COZY LITTLE INTERGALACTIC SIDE HUSTLE</span>
+      <h2 id="welcome-title">Got milk?<br><em>Get rich.</em></h2>
+      <p>Beam up a cow. Milk it aboard your saucer.<br>Sell it to the galaxy, one bottle at a time.</p>
+      <div class="welcome-actions">
+        <button data-action="start" class="start-button">Play <span>↗</span></button>
+        <button data-action="start" data-value="tutorial" class="start-button">Play with tutorial</button>
+      </div>
+      <small>Mouse or ← → to fly · Click or Space to beam · 1 2 3 to travel · I for inventory</small>
+    </section>
+
+    <dialog id="world-dialog" class="world-dialog" aria-labelledby="dialog-title"><div class="dialog-rim"><span id="dialog-eyebrow">GALACTIC FIELD NOTES</span><button data-action="close-dialog" class="close-dialog" aria-label="Close">×</button></div><div class="dialog-content" id="dialog-content"></div></dialog>
+    <div id="announcement" class="sr-only" aria-live="polite"></div>
+    <noscript><div class="noscript">Enable JavaScript to run your alien dairy.</div></noscript>
+  </main>
+</body>
+</html>

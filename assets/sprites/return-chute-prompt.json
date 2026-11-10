@@ -1,0 +1,8 @@
+{
+  "generator": "Built-in image_gen tool",
+  "destination": "assets/sprites/return-chute.png",
+  "referenceArt": ["assets/InShipBg.png", "assets/sprites/return-pod.png"],
+  "sourceFilename": "exec-02dd9324-c092-4993-b30a-22ae1c3eb391.png",
+  "transparentBackground": true,
+  "prompt": "Use case: stylized-concept. Asset type: transparent game sprite. Create ONE fixed wall-mounted cow return CHUTE for the existing cozy pixel art spaceship game. The supplied InShipBg.png and return-pod.png are STYLE REFERENCES only. Match their chunky stepped dark plum outlines, clustered pixel shading, muted lavender gray metal, pale cream highlights, mint indicator lights. Front view with slight top-down perspective, a squat industrial rectangular hopper/airlock: wide open dark recessed mouth in upper half large enough for a cow, thick beveled metal rim with stepped corners, angled short slide/ramp leading into the mouth in lower half, sturdy base, tiny mint status lights and yellow-black safety stripes on lip. It must look like a stationary wall chute, not a rocket or vehicle, no round porthole, no fins, no thruster. Center single object fills canvas with transparent margins, roughly square/taller than wide, sharp pixel art edges, low-res game sprite texture. No text, no lettering, no cow, no background, no floor, no glow cloud or cast shadow outside object. Reference art colors and visual style closely."
+}
