@@ -12,7 +12,7 @@ No background rectangle moves with a tree, leaf, or flower.
   the herd in `farm-foreground` so cows stay behind the foreground.
 - `field-clouds.png`: transparent cloud texture atlas from `FieldBg.png`.
 - `field-tree-left.png`, `field-tree-right.png`: transparent original trees.
-- `field-flower-heads.png`: six original blossom heads from `FieldBg.png` on a
+- `field-flower-heads.png`: four repaired pink blossoms and two original daisies on a
   192×128 transparent atlas. Padded 64×64 cells preserve the painting's native
   scale, colours, pixel clusters, and broad dark contours.
 - `field-ground-clean.png`: the clean plate used only through four local plant
@@ -33,6 +33,10 @@ The game loads the prepared PNGs directly, including in `file://` mode.
   layers. Individual stars fade independently over the clean sky.
 - `flower-heads-source.png`: retained earlier generated sheet; no longer used
   to prepare the flower atlas or by the game.
+- `flower-heads-repaired-source.png`: complete pink blossom and bud artwork
+  repaired with built-in ImageGen. The ambient-art builder extracts each pink
+  silhouette, removes translucent fringes, and scales with nearest-neighbour
+  sampling to the native flower sizes. Daisies still come from `FieldBg.png`.
 
 `scripts/build-ambient-art.cjs` prepares the star layers and flower atlas. Run it
 after `scripts/build-field-art.cjs` if rebuilding all the art. Both scripts use

@@ -77,11 +77,33 @@
   function branchPoint(f,u,bend) {
     return [f.root[0]+(f.tip[0]-f.root[0])*u+bend*u*u, f.root[1]+(f.tip[1]-f.root[1])*u];
   }
+  // Two-pixel clusters match the painted foliage instead of smooth vector lines.
+  const leafSprite=document.createElement('canvas');
+  leafSprite.width=11;leafSprite.height=13;
+  const leafCtx=leafSprite.getContext('2d');
+  const leafColors={'#':'#161e13',s:'#435e2b',g:'#718c39',h:'#a0b952'};
+  [
+    '         ##',
+    '       ##g#',
+    '      #ghg#',
+    '     #ghhg#',
+    '    #ghhgs#',
+    '   #ghhgss#',
+    '  #ghhgss# ',
+    ' #ghhgss#  ',
+    ' #ghgss#   ',
+    '#ghgss#    ',
+    '#ggss#     ',
+    '#gss#      ',
+    ' ###       '
+  ].forEach((row,y)=>Array.from(row).forEach((pixel,x)=>{
+    if(leafColors[pixel]){leafCtx.fillStyle=leafColors[pixel];leafCtx.fillRect(x,y,1,1);}
+  }));
   function drawFlower(ctx,heads,f,t,headOnly=false) {
     // Wind bends a quadratic stem, with zero displacement at the root. The
     // flower head follows the tip and its tangent instead of moving a rectangle.
     const bend=(Math.sin(t*.85+f.phase)+.16*Math.sin(t*1.55+f.phase))*f.sway;
-    const tip=branchPoint(f,1,bend), control=branchPoint(f,.5,0);
+    const tip=branchPoint(f,1,bend);
     if(headOnly) {
       const sx=f.sprite%3*64,sy=Math.floor(f.sprite/3)*64;
       ctx.save();ctx.translate(...tip);ctx.rotate(bend*.009);
@@ -89,15 +111,16 @@
       ctx.imageSmoothingEnabled=false;
       ctx.drawImage(heads,sx,sy,64,64,-32,-32,64,64);ctx.restore();return;
     }
-    ctx.lineCap='round'; ctx.lineJoin='round';
-    for(const [color,width] of [['#161e13',10],['#8fa940',5]]) {
-      ctx.beginPath(); ctx.moveTo(...f.root); ctx.quadraticCurveTo(...control,...tip); ctx.strokeStyle=color; ctx.lineWidth=width; ctx.stroke();
+    const steps=Math.ceil(Math.hypot(tip[0]-f.root[0],tip[1]-f.root[1])/2);
+    const points=Array.from({length:steps+1},(_,i)=>branchPoint(f,i/steps,bend).map(v=>Math.round(v/2)*2));
+    for(const [color,size,offset] of [['#161e13',8,-4],['#718c39',4,-2],['#a0b952',2,-2]]) {
+      ctx.fillStyle=color;
+      for(const [x,y] of points)ctx.fillRect(x+offset,y+offset,size,size);
     }
     const u=f.sway>3?.38:.55, leaf=branchPoint(f,u,bend), direction=f.tip[0]<f.root[0]?-1:1;
-    ctx.save(); ctx.translate(...leaf); ctx.rotate(bend*.008);
-    ctx.beginPath(); ctx.moveTo(0,1); ctx.lineTo(direction*7,-13); ctx.lineTo(direction*16,-18);
-    ctx.lineTo(direction*13,-7); ctx.lineTo(direction*5,2); ctx.closePath();
-    ctx.fillStyle='#769740'; ctx.strokeStyle='#26321c'; ctx.lineWidth=3; ctx.fill(); ctx.stroke(); ctx.restore();
+    ctx.save();ctx.translate(...leaf.map(v=>Math.round(v/2)*2));ctx.scale(direction,1);
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(leafSprite,-4,-24,22,26);ctx.restore();
   }
   function drawTree(ctx,img,x,y,pivot,angle) {
     ctx.save(); ctx.translate(...pivot); ctx.rotate(angle); ctx.translate(-pivot[0],-pivot[1]);

@@ -52,6 +52,21 @@ Style reference: `assets/FieldBg.png`. Transparent output saved as
 `assets/scenery/flower-heads-source.png`; prepared atlas saved as
 `assets/scenery/field-flower-heads.png`.
 
+## Repaired flower sprites (November 2026)
+
+The pink buds and open flowers now use complete isolated silhouettes from
+`assets/scenery/flower-heads-repaired-source.png`, created using built-in
+ImageGen. The original landscape extraction left missing outline and petal
+pixels at the tops and middles of the plants. The builder keeps original daisy
+art, extracts the repaired pink sprites, thresholds their alpha to solid
+silhouettes, and scales them to the native sizes without smoothing. The final
+runtime atlas is `assets/scenery/field-flower-heads.png`.
+
+Edit targets: the old runtime atlas and `flower-heads-source.png` as a shape
+reference. Exact prompt:
+
+> Use case: precise-object-edit. Asset type: tiny pixel-art flower blossom sprite sheet for an existing farm game. Image 1 is the edit target: a 3-column 2-row sheet containing damaged incomplete flower heads. Image 2 shows the desired complete shapes, only as supporting shape reference. Repair the broken or missing petal edges, interiors and outlines in image 1. Retain its native chunky broad pixel clusters, pink/coral/cream palette and heavy nearly black outlines. Six isolated sprites on a truly transparent background in equally sized cells in a strict 3-column 2-row grid: upper left a complete five-petal coral pink blossom with gold center; upper middle a slightly angled complete five-petal pink blossom with gold center; upper right a complete closed pointed pink flower bud; lower left and lower middle the original complete small ivory daisies with gold centers; lower right a small complete five-petal pink blossom with gold center. Every silhouette must be closed and complete, every petal interior fully opaque; no stray pixels, no missing patches, no grass or stems, no shadows or glows, no text. Generous transparent padding around each sprite; sprites cannot touch or overlap. Pixel art with large flat pixel clusters matching image 1. Keep exactly the same arrangement and shapes as the two references, while completing the damaged flowers.
+
 ## Verification
 
 Run with the local game server and a Playwright installation available through

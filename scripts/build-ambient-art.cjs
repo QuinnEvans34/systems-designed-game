@@ -51,23 +51,19 @@ const path = require('node:path');
         ctx.putImageData(pixels,0,0); starCtx.putImageData(atlas,0,0);
         results[name+'-ambient-base']=base; results[name+'-stars']=stars;
       }
-      // Reuse the painting's native blossoms, including its broad outlines and
-      // large pixel clusters. Generated replacements had a finer pixel scale.
+      // Keep the painting's original daisies; pink flowers use complete,
+      // isolated artwork rather than clipping petals out of the landscape.
       const source=surface(flowers.width,flowers.height), sc=source.getContext('2d',{willReadFrequently:true}); sc.drawImage(flowers,0,0);
       const src=sc.getImageData(0,0,source.width,source.height).data;
       const atlas=surface(192,128), ac=atlas.getContext('2d'), atlasPixels=ac.createImageData(192,128);
       const crops=[[45,707,54,49,73,737],[33,744,54,47,61,775],[73,684,36,44,92,706],
         [558,844,56,53,585,869],[1064,845,56,52,1092,871],[56,792,48,40,84,814]];
-      const contours=[
-        [[61,707],[77,707],[82,716],[90,715],[99,720],[99,729],[90,734],[93,745],[86,755],[75,755],[70,749],[61,754],[49,747],[45,737],[50,725],[59,720]],
-        [[44,747],[53,744],[67,745],[73,753],[80,751],[87,757],[87,771],[78,778],[79,785],[70,791],[60,787],[55,780],[46,781],[36,774],[33,764],[38,753]],
-        [[73,698],[79,689],[85,684],[97,684],[105,691],[109,699],[108,710],[101,720],[88,728],[80,719],[75,711]]
-      ];
       crops.forEach(([left,top,w,h,anchorX,anchorY],cell)=>{
+        if(cell!==3&&cell!==4)return;
         const core=new Uint8Array(w*h), mask=new Uint8Array(w*h);
         for(let y=0;y<h;y++)for(let x=0;x<w;x++){
           const i=((top+y)*W+left+x)*4,r=src[i],g=src[i+1],b=src[i+2];
-          core[y*w+x]=cell===3||cell===4 ? r>185&&g>165&&b>115 : r>120&&r>g*1.12&&b>g*(cell===5?.83:.65);
+          core[y*w+x]=r>185&&g>165&&b>115;
         }
         for(let y=0;y<h;y++)for(let x=0;x<w;x++){
           const p=y*w+x,i=((top+y)*W+left+x)*4;
@@ -86,21 +82,34 @@ const path = require('node:path');
           const p=queue[j],x=p%w;
           for(const n of [x?p-1:-1,x<w-1?p+1:-1,p-w,p+w])if(n>=0&&n<w*h)seed(n);
         }
-        const clip=surface(w,h),clipCtx=clip.getContext('2d');
-        if(contours[cell]){
-          clipCtx.beginPath();contours[cell].forEach(([x,y],i)=>i?clipCtx.lineTo(x-left,y-top):clipCtx.moveTo(x-left,y-top));
-          clipCtx.closePath();clipCtx.fill();
-        }else clipCtx.fillRect(0,0,w,h);
-        const allowed=clipCtx.getImageData(0,0,w,h).data;
         for(let y=0;y<h;y++)for(let x=0;x<w;x++){
           if(!mask[y*w+x]&&exterior[y*w+x])continue;
-          if(allowed[(y*w+x)*4+3]<128)continue;
           const i=((top+y)*W+left+x)*4;
           const dx=cell%3*64+32+left+x-anchorX,dy=Math.floor(cell/3)*64+32+top+y-anchorY;
           atlasPixels.data.set(src.subarray(i,i+4),(dy*192+dx)*4);
         }
       });
       ac.putImageData(atlasPixels,0,0);
+      const repaired=await load('scenery/flower-heads-repaired-source.png');
+      const sheet=surface(repaired.width,repaired.height),sheetCtx=sheet.getContext('2d',{willReadFrequently:true});
+      sheetCtx.drawImage(repaired,0,0);
+      const cellW=repaired.width/3,cellH=repaired.height/2;
+      for(const cell of [0,1,2,5]){
+        const pixels=sheetCtx.getImageData(cell%3*cellW,Math.floor(cell/3)*cellH,cellW,cellH);
+        let left=cellW,top=cellH,right=0,bottom=0;
+        for(let y=0;y<cellH;y++)for(let x=0;x<cellW;x++){
+          const i=(y*cellW+x)*4;
+          // Discard the source's soft fringe, keeping solid pixel silhouettes.
+          const opaque=pixels.data[i+3]>=128;
+          pixels.data[i+3]=opaque?255:0;
+          if(opaque){left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x);bottom=Math.max(bottom,y);}
+        }
+        const sprite=surface(cellW,cellH);sprite.getContext('2d').putImageData(pixels,0,0);
+        const [, ,maxW,maxH]=crops[cell],w=right-left+1,h=bottom-top+1;
+        const scale=Math.min(maxW/w,maxH/h),dw=Math.round(w*scale),dh=Math.round(h*scale);
+        ac.imageSmoothingEnabled=false;
+        ac.drawImage(sprite,left,top,w,h,cell%3*64+Math.floor((64-dw)/2),Math.floor(cell/3)*64+Math.floor((64-dh)/2),dw,dh);
+      }
       results['field-flower-heads']=atlas;
       return Object.fromEntries(Object.entries(results).map(([name,c])=>[name,c.toDataURL().split(',')[1]]));
     });

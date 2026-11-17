@@ -500,7 +500,18 @@ body.drag-item .cow-card:not(.empty) { border-style: dashed; }
 .world-dialog, .world-dialog[data-kind="storage"] { width: min(880px, calc(100% - 24px)); }
 .dialog-rim { padding: 12px 16px; border-bottom-width: var(--ui-pixel); }
 .dialog-rim > span { font-size: 18px; letter-spacing: 0; }
-.close-dialog { width: 40px; height: 40px; font-size: 28px; }
+.dialog-rim .close-dialog {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border-width: 8px;
+  border-image-width: 8px;
+  padding: 0;
+  line-height: 0;
+}
+.close-dialog svg { display: block; width: 18px; height: 18px; }
 .dialog-content { max-height: calc(min(86dvh, 780px) - 88px); }
 .dialog-content h2 { font-size: 32px; letter-spacing: 0; }
 .dialog-content h2 small { font-size: 20px; }
