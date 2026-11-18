@@ -158,6 +158,24 @@ At the Marketplace, players can spend coins on power-ups such as a bigger UFO, a
 
 All costs and effects are placeholders. Level 3 is the cap for now, and more levels can be added if the numbers feel right in playtesting.
 
+## Playable test changes (team-owned)
+
+After play-testing Ted's first build, the team decided on two changes. The team will code both over the weekend of Nov 21–22. All numbers are placeholders to tune.
+
+**1. The game ends after 10 rounds.** One round is a full trip: Field → Ship → Market. A round ends when the player leaves the Market. After round 10, the game ends and shows the final coin total as the score. This gives the game a clear finish and a number to beat on the leaderboard.
+
+**2. Milker maintenance and random breakdowns.** The milking machine wears out, and the Hard Hat Cat repairs it.
+
+| Parameter | Placeholder value |
+| --- | --- |
+| Milker condition at start | 100% |
+| Wear per milking | −10% |
+| Slow-down below 50% condition | Milking takes 2× as long |
+| Breakdown chance per milking | 5% at 50% condition or above, 20% below 50%, always at 0% |
+| Repair by the Hard Hat Cat | 15 coins, takes 20 seconds, restores 100% |
+
+This adds a balancing loop (more milking → more wear → slower milking and repair costs), a delay (the repair time), and the game's randomness (breakdowns can happen at any milking, more often as the machine wears down). It came from our iceberg analysis: money was too easy to earn, because the ship had a reinforcing loop with nothing pushing back.
+
 ## Screens, assets, open questions and build plan
 
 The game is digital and builds on our browser demo. It runs in a web browser, so classmates can play it on their laptops at the in-class playtest and the final production play. Ted Roper is making the art assets.
