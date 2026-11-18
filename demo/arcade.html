@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moo-ving Violations Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* One visual world: a moonlit farm valley at night. Layout: HUD strip, play field, then ship controls beside the live stock-and-flow view. */
+  --night: #0b0e2b;
+  --panel: #151a44;
+  --panel-2: #1d2356;
+  --ink: #eceffd;
+  --muted: #a1a8d8;
+  --amber: #ffc65a;   /* UI accent: lantern light */
+  --beam: #9fefff;    /* tractor beam */
+  --good: #7ee0a1;
+  --warn: #ffb35a;
+  --bad: #ff6b6b;
+  --line: rgba(161,168,216,0.22);
+  --font-display: "Bungee", "Impact", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--night); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 18px 16px 40px; display: grid; gap: 14px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: 30px; margin: 0; letter-spacing: 0.5px; color: var(--amber); text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; }
+h2 { font-family: var(--font-display); font-weight: 400; font-size: 15px; letter-spacing: 0.6px; margin: 0 0 10px; color: var(--ink); }
+
+.hud { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 4px; }
+.tile .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+.tile .v { font-family: var(--font-mono); font-size: 20px; font-variant-numeric: tabular-nums; }
+.segs { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; height: 10px; }
+.segs i { border-radius: 2px; background: rgba(255,255,255,0.08); }
+.note { font-size: 12px; color: var(--muted); }
+.note b { color: var(--ink); font-weight: 600; }
+
+.event { background: linear-gradient(90deg, rgba(255,198,90,0.16), rgba(255,198,90,0.04)); border: 1px solid rgba(255,198,90,0.35); border-radius: 10px; padding: 9px 12px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.event strong { color: var(--amber); font-family: var(--font-display); font-weight: 400; font-size: 13px; letter-spacing: 0.5px; }
+
+.stage { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: #070920; }
+canvas { display: block; width: 100%; height: auto; aspect-ratio: 960 / 440; touch-action: none; cursor: crosshair; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.controls .group { display: flex; gap: 8px; flex-wrap: wrap; }
+.hint { color: var(--muted); font-size: 13px; }
+kbd { font-family: var(--font-mono); font-size: 12px; background: var(--panel-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; color: var(--ink); }
+
+button { font: inherit; font-weight: 600; color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 13px; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+button:hover:not(:disabled) { border-color: var(--amber); }
+button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.primary { background: var(--amber); color: #23180a; border-color: var(--amber); }
+button.beam { background: rgba(159,239,255,0.14); border-color: rgba(159,239,255,0.5); color: var(--beam); }
+button.beam.on { background: rgba(159,239,255,0.32); }
+button.small { padding: 4px 9px; font-size: 13px; }
+
+.cols { display: grid; grid-template-columns: 1fr 1.25fr; gap: 14px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 12px; align-content: start; }
+.pen { display: grid; gap: 6px; }
+.cow-row { display: flex; align-items: center; gap: 10px; background: var(--panel-2); border-radius: 8px; padding: 7px 10px; }
+.cow-row .name { flex: 1; font-weight: 600; }
+.chip { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.chip.rest { color: var(--muted); }
+.chip.ready { color: var(--good); }
+.chip.done { color: var(--beam); }
+.chip.grumpy { color: var(--bad); }
+.empty { color: var(--muted); font-size: 13px; background: var(--panel-2); border-radius: 8px; padding: 10px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 6px; align-items: stretch; }
+.stock { background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 8px 9px; display: grid; gap: 2px; align-content: start; }
+.stock .k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); }
+.stock .v { font-family: var(--font-mono); font-size: 19px; font-variant-numeric: tabular-nums; }
+.stock .d { font-size: 11.5px; color: var(--muted); }
+.arrow { display: grid; place-items: center; color: var(--amber); font-size: 11px; text-align: center; line-height: 1.2; min-width: 44px; }
+.arrow span { font-size: 18px; display: block; }
+.flow2 { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; }
+.loops { display: grid; gap: 6px; font-size: 13px; }
+.loop { border-left: 3px solid var(--good); padding: 2px 0 2px 9px; }
+.loop.bal { border-color: var(--warn); }
+.loop.delay { border-color: var(--beam); }
+.loop b { font-weight: 600; }
+.ships { font-size: 13px; color: var(--muted); }
+
+.modal { position: fixed; inset: 0; background: rgba(4,5,18,0.72); display: none; place-items: center; padding: 16px; z-index: 10; }
+.modal.open { display: grid; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; max-width: 460px; width: 100%; display: grid; gap: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.card h3 { font-family: var(--font-display); font-weight: 400; margin: 0; font-size: 20px; color: var(--amber); }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.card .why { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+
+@media (max-width: 760px) {
+  .hud { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .cols { grid-template-columns: 1fr; }
+  .flow { grid-template-columns: 1fr; }
+  .arrow { min-height: 22px; }
+  .arrow span { transform: rotate(90deg); }
+  h1 { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Moo-ving Violations</h1>
+    <p class="sub">A playable stocks-and-flows demo. Fly, abduct, milk, and ship before Earth catches on.</p>
+  </header>
+
+  <section class="hud" aria-label="Status">
+    <div class="tile"><span class="k">Night</span><span class="v" id="hNight">1 / 10</span><span class="note" id="hNightNote">10 nights to ship milk</span></div>
+    <div class="tile"><span class="k">Fuel</span><span class="v" id="hFuel">10</span><div class="segs" id="fuelSegs"></div><span class="note">Abduct 2 · ship 1 · +6 each night</span></div>
+    <div class="tile"><span class="k">Galactic credits</span><span class="v" id="hCredits">0</span><span class="note">5 credits per gallon delivered</span></div>
+    <div class="tile"><span class="k">Suspicion</span><span class="v" id="hSusp">0 / 10</span><div class="segs" id="suspSegs"></div><span class="note" id="hSuspNote">Quiet</span></div>
+  </section>
+
+  <div class="event" id="eventBar"><strong id="eventName">Quiet night</strong><span id="eventText">Nothing unusual. A good night to learn the ropes.</span></div>
+
+  <div class="stage">
+    <canvas id="game" width="960" height="440" aria-label="Farm valley at night with your UFO. Use arrow keys to fly and Space to beam up cows."></canvas>
+  </div>
+
+  <div class="controls">
+    <div class="group">
+      <button id="btnLeft" aria-label="Fly left">◀ Fly</button>
+      <button id="btnBeam" class="beam">Hold to beam</button>
+      <button id="btnRight" aria-label="Fly right">Fly ▶</button>
+    </div>
+    <span class="hint"><kbd>←</kbd><kbd>→</kbd> or mouse to fly · hold <kbd>Space</kbd> or click-and-hold to beam · <kbd>M</kbd> milk · <kbd>H</kbd> ship · <kbd>N</kbd> end night</span>
+  </div>
+
+  <div class="cols">
+    <section class="panel" aria-label="Your ship">
+      <h2>Your ship</h2>
+      <div>
+        <div class="note" style="margin-bottom:6px">Ship pen <b id="penCount">0 / 4</b>. New cows rest one night before they give milk.</div>
+        <div class="pen" id="penList"></div>
+      </div>
+      <div class="actions">
+        <button id="btnMilk">Milk ready cows</button>
+        <button id="btnShip">Beam milk home</button>
+        <button id="btnEnd" class="primary">End night</button>
+      </div>
+      <div class="ships" id="shipList">No shipments in transit.</div>
+    </section>
+
+    <section class="panel" aria-label="System view">
+      <h2>The system, live</h2>
+      <div class="flow">
+        <div class="stock"><span class="k">Earth herd</span><span class="v" id="fHerd">16</span><span class="d">Farms with 3+ cows breed 1 calf a night</span></div>
+        <div class="arrow"><span>→</span>abduct</div>
+        <div class="stock"><span class="k">Ship pen</span><span class="v" id="fPen">0 / 4</span><span class="d">Release a cow to cut suspicion by 1</span></div>
+        <div class="arrow"><span>→</span>milk</div>
+        <div class="stock"><span class="k">Milk tanks</span><span class="v" id="fTank">0 / 12</span><span class="d">Gallons spoil after 2 nights</span></div>
+      </div>
+      <div class="flow2">
+        <div class="stock"><span class="k">In transit</span><span class="v" id="fTransit">0</span><span class="d">Takes 2 nights. Patrols can shoot it down.</span></div>
+        <div class="arrow"><span>→</span>deliver</div>
+        <div class="stock"><span class="k">Credits</span><span class="v" id="fCredits">0</span><span class="d">Your score</span></div>
+      </div>
+      <div class="loops">
+        <div class="loop"><b>Reinforcing:</b> cows left on Earth breed more cows. Overharvest a farm below 3 and it stops growing.</div>
+        <div class="loop bal"><b>Balancing:</b> every abduction raises suspicion, which raises your spot risk (now <b id="lRisk">0%</b>). Quiet nights cool it down.</div>
+        <div class="loop delay"><b>Delays:</b> suspicion lands at dawn (<b id="lPending">+0</b> waiting), cows rest a night, milk takes 2 nights to arrive.</div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="card">
+    <h3 id="mTitle">Dawn report</h3>
+    <div id="mBody"></div>
+    <button class="primary" id="mBtn">Start next night</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const W = 960, H = 440, GROUND = 372;
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function fitCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  fitCanvas();
+  window.addEventListener('resize', fitCanvas);
+
+  const FARMS = [
+    { name: 'Miller', x0: 0, x1: 240, alert: 0 },
+    { name: 'Ortega', x0: 240, x1: 480, alert: 0 },
+    { name: 'Haines', x0: 480, x1: 720, alert: 0 },
+    { name: 'Begay', x0: 720, x1: 960, alert: 0 },
+  ];
+  const NAMES = ['Bessie','Clover','Daisy','Moolan','Buttercup','Sir Moo-ington','Penny','Hazel','Marge','Dot','Rosie','Biscuit','Waffles','Patches','Juniper','Maple','Pickles','Gouda','Brie','Nugget','Toffee','Peaches','Olive','Mocha','Pudding','Ziggy','Lulu','Cocoa'];
+  let nameIdx = 0;
+  const nextName = () => NAMES[nameIdx++ % NAMES.length] + (nameIdx > NAMES.length ? ' II' : '');
+
+  const EVENTS = {
+    calm:     { id: 'calm', name: 'Quiet night', text: 'Nothing unusual. Normal rules apply.' },
+    fullMoon: { id: 'fullMoon', name: 'Full moon', text: 'Everyone can see you. Each abduction adds +2 suspicion and spot risk is +10%.' },
+    crop:     { id: 'crop', name: 'Crop circle craze', text: 'Tourists blame pranksters: suspicion −1. But crowds add +15% spot risk tonight.' },
+    shortage: { id: 'shortage', name: 'Galactic milk shortage', text: 'Shipments that arrive at dawn pay double.' },
+    podcast:  { id: 'podcast', name: 'Conspiracy podcast', text: 'A podcast covers the missing cows: suspicion +1.' },
+    madCow:   { id: 'madCow', name: 'Grumpy cow', text: 'One cow in your pen refuses to give milk tonight.' },
+    tailwind: { id: 'tailwind', name: 'Solar tailwind', text: 'Free energy from the sun: +3 fuel.' },
+  };
+  const EVENT_POOL = ['fullMoon','crop','shortage','podcast','madCow','tailwind','calm'];
+
+  let S, cows, ufo, floats, lifting, stars, t = 0;
+
+  function newGame() {
+    S = { night: 1, maxNights: 10, fuel: 10, credits: 0, susp: 0, pending: 0, abductedTonight: 0,
+          pen: [], penCap: 4, tank: [], tankCap: 12, ships: [], event: EVENTS.calm, over: false, delivered: 0 };
+    cows = []; floats = []; lifting = null; nameIdx = 0;
+    FARMS.forEach((f, fi) => { f.alert = 0; for (let i = 0; i < 4; i++) cows.push(makeCow(fi, false)); });
+    ufo = { x: 480, y: 92, vx: 0 };
+    renderUI();
+  }
+
+  function makeCow(fi, calf, x) {
+    const f = FARMS[fi];
+    return { name: nextName(), farm: fi, x: x ?? (f.x0 + 70 + Math.random() * (f.x1 - f.x0 - 90)), y: GROUND,
+             vx: 0, vy: 0, dir: Math.random() < 0.5 ? -1 : 1, walk: Math.random() * 6, timer: Math.random() * 3,
+             state: 'graze', rot: 0, calf, liftT: 0, spotted: false };
+  }
+
+  stars = Array.from({ length: 110 }, () => ({ x: Math.random() * W, y: Math.random() * (GROUND - 120), r: Math.random() * 1.3 + 0.3, p: Math.random() * 6.28 }));
+
+  // ---------- Input ----------
+  const keys = { left: false, right: false, space: false };
+  let btnDir = 0, btnBeam = false, canvasHold = false, pointerX = null;
+  const modalOpen = () => document.getElementById('modal').classList.contains('open');
+
+  window.addEventListener('keydown', e => {
+    if (modalOpen()) return;
+    const k = e.key;
+    if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.left = true; e.preventDefault(); }
+    else if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = true; e.preventDefault(); }
+    else if (k === ' ') { keys.space = true; e.preventDefault(); }
+    else if (k === 'm' || k === 'M') milk();
+    else if (k === 'h' || k === 'H') ship();
+    else if (k === 'n' || k === 'N') endNight();
+  });
+  window.addEventListener('keyup', e => {
+    const k = e.key;
+    if (k === 'ArrowLeft' || k === 'a' || k === 'A') keys.left = false;
+    else if (k === 'ArrowRight' || k === 'd' || k === 'D') keys.right = false;
+    else if (k === ' ') keys.space = false;
+  });
+  window.addEventListener('blur', () => { keys.left = keys.right = keys.space = false; btnBeam = canvasHold = false; btnDir = 0; });
+
+  const toLocal = e => { const r = canvas.getBoundingClientRect(); return (e.clientX - r.left) * (W / r.width); };
+  canvas.addEventListener('pointermove', e => { pointerX = toLocal(e); });
+  canvas.addEventListener('pointerleave', () => { pointerX = null; canvasHold = false; });
+  canvas.addEventListener('pointerdown', e => { pointerX = toLocal(e); canvasHold = true; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener('pointerup', () => { canvasHold = false; });
+  canvas.addEventListener('pointercancel', () => { canvasHold = false; });
+
+  function holdBtn(id, on, off) {
+    const b = document.getElementById(id);
+    b.addEventListener('pointerdown', e => { e.preventDefault(); on(); b.classList.add('on'); });
+    ['pointerup','pointerleave','pointercancel'].forEach(ev => b.addEventListener(ev, () => { off(); b.classList.remove('on'); }));
+    b.addEventListener('contextmenu', e => e.preventDefault());
+  }
+  holdBtn('btnLeft', () => btnDir = -1, () => btnDir = 0);
+  holdBtn('btnRight', () => btnDir = 1, () => btnDir = 0);
+  holdBtn('btnBeam', () => btnBeam = true, () => btnBeam = false);
+
+  document.getElementById('btnMilk').addEventListener('click', milk);
+  document.getElementById('btnShip').addEventListener('click', ship);
+  document.getElementById('btnEnd').addEventListener('click', endNight);
+
+  // ---------- Helpers ----------
+  const tankTotal = () => S.tank.reduce((a, b) => a + b.amt, 0);
+  const transitTotal = () => S.ships.reduce((a, b) => a + b.amt, 0);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const farmAt = x => clamp(Math.floor(x / 240), 0, 3);
+  const spotRisk = () => {
+    let r = S.susp * 0.06;
+    if (S.event.id === 'fullMoon') r += 0.10;
+    if (S.event.id === 'crop') r += 0.15;
+    return clamp(r, 0, 0.65);
+  };
+  const lastMsg = {};
+  function say(text, x, y, color = '#eceffd', key) {
+    if (key) { if (lastMsg[key] && t - lastMsg[key] < 1.6) return; lastMsg[key] = t; }
+    floats.push({ text, x, y, life: 2.2, max: 2.2, color });
+  }
+
+  // ---------- Actions ----------
+  function completeAbduction(c) {
+    cows.splice(cows.indexOf(c), 1);
+    S.pen.push({ name: c.name, rested: false, milked: false, grumpy: false, calf: c.calf });
+    S.fuel -= 2;
+    const add = S.event.id === 'fullMoon' ? 2 : 1;
+    S.pending += add; S.abductedTonight++;
+    say(`${c.name} abducted!  +${add} suspicion at dawn`, ufo.x, ufo.y - 34, '#9fefff');
+    renderUI();
+  }
+
+  function milk() {
+    if (S.over || modalOpen()) return;
+    let made = 0, full = false, ready = 0;
+    for (const c of S.pen) {
+      if (!c.rested || c.milked || c.grumpy) continue;
+      ready++;
+      if (tankTotal() + made + 2 > S.tankCap) { full = true; break; }
+      c.milked = true; made += 2;
+    }
+    if (made) { S.tank.push({ amt: made, age: 0 }); say(`+${made} gallons of milk`, ufo.x, ufo.y - 34, '#7ee0a1'); }
+    else if (full) say('Milk tanks full. Beam some milk home.', ufo.x, ufo.y - 34, '#ffb35a');
+    else if (!ready) say(S.pen.length ? 'No cows ready. New cows rest until tomorrow.' : 'Your pen is empty. Go abduct a cow!', ufo.x, ufo.y - 34, '#ffb35a');
+    renderUI();
+  }
+
+  function ship() {
+    if (S.over || modalOpen()) return;
+    const amt = tankTotal();
+    if (!amt) { say('Nothing in the tanks to ship.', ufo.x, ufo.y - 34, '#ffb35a'); return; }
+    if (S.fuel < 1) { say('Need 1 fuel to beam milk home.', ufo.x, ufo.y - 34, '#ff6b6b'); return; }
+    S.ships.push({ amt, eta: 2 }); S.tank = []; S.fuel -= 1;
+    say(`${amt} gal beamed home. Arrives in 2 nights`, ufo.x, ufo.y - 34, '#ffc65a');
+    renderUI();
+  }
+
+  function release(i) {
+    if (S.over || modalOpen()) return;
+    const p = S.pen.splice(i, 1)[0];
+    const c = makeCow(farmAt(ufo.x), p.calf, ufo.x);
+    c.name = p.name; c.state = 'fall'; c.y = ufo.y + 30; c.vy = 0; c.rot = 0.4;
+    cows.push(c);
+    S.pending -= 1;
+    say(`${p.name} returned. −1 suspicion at dawn`, ufo.x, ufo.y - 34, '#7ee0a1');
+    renderUI();
+  }
+
+  function endNight() {
+    if (S.over || modalOpen()) return;
+    if (lifting) { lifting.state = 'fall'; lifting = null; }
+    const lines = [], why = [];
+    const mult = S.event.id === 'shortage' ? 2 : 1;
+
+    // Patrols intercept shipments when suspicion is high
+    let lost = 0;
+    if (S.susp >= 7) S.ships = S.ships.filter(s => { if (Math.random() < 0.3) { lost += s.amt; return false; } return true; });
+
+    // Shipments advance (delay)
+    let arrived = 0;
+    S.ships.forEach(s => s.eta--);
+    S.ships = S.ships.filter(s => { if (s.eta <= 0) { arrived += s.amt; return false; } return true; });
+    const earned = arrived * 5 * mult;
+    S.credits += earned; S.delivered += arrived;
+
+    // Milk ages and spoils
+    let spoiled = 0;
+    S.tank.forEach(b => b.age++);
+    S.tank = S.tank.filter(b => { if (b.age >= 2) { spoiled += b.amt; return false; } return true; });
+
+    // Breeding (reinforcing loop)
+    let calves = 0; const barren = [];
+    FARMS.forEach((f, fi) => {
+      const n = cows.filter(c => c.farm === fi).length;
+      if (n >= 3 && n < 7) { cows.push(makeCow(fi, true)); calves++; }
+      else if (n < 3) barren.push(f.name);
+    });
+    cows.forEach(c => { if (c.calf && Math.random() < 0.5) c.calf = false; });
+
+    // Suspicion lands at dawn (delay + balancing loop)
+    let delta = S.pending;
+    if (S.abductedTonight === 0) delta -= 1;
+    const before = S.susp;
+    S.susp = clamp(S.susp + delta, 0, 10);
+
+    // Pen resets, fuel refills
+    S.pen.forEach(c => { c.rested = true; c.milked = false; c.grumpy = false; });
+    S.fuel = Math.min(10, S.fuel + 6);
+
+    if (arrived) lines.push(`Delivered <b>${arrived} gal</b> → <b>+${earned} credits</b>${mult > 1 ? ' (double pay from the shortage)' : ''}`);
+    else lines.push('No milk arrived home tonight.');
+    if (lost) lines.push(`Military patrols shot down <b>${lost} gal</b> in transit.`);
+    if (spoiled) lines.push(`<b>${spoiled} gal</b> spoiled in your tanks.`);
+    lines.push(`Earth herd: <b>${calves} calf${calves === 1 ? '' : 'ves'}</b> born, now <b>${cows.length} cows</b>.`);
+    lines.push(`Suspicion: ${before} → <b>${S.susp}</b>${S.abductedTonight === 0 ? ' (a quiet night cooled things off)' : ''}.`);
+
+    if (S.abductedTonight) why.push(`Balancing loop: you abducted ${S.abductedTonight} cow${S.abductedTonight > 1 ? 's' : ''}, so the farmers grew more suspicious. Spot risk next night: ${Math.round(clamp(S.susp * 0.06, 0, 0.65) * 100)}%.`);
+    if (barren.length) why.push(`Herd warning: ${barren.join(', ')} ${barren.length > 1 ? 'have' : 'has'} fewer than 3 cows and can't breed.`);
+    if (spoiled) why.push('Stock lesson: milk sitting in a stock too long drains out as spoilage. Ship sooner.');
+
+    S.night++; S.pending = 0; S.abductedTonight = 0;
+
+    // End conditions
+    if (S.susp >= 10) return gameOver('Area 51 alert!', 'The military found your saucer. The invasion ends the game, and milk still in transit is lost.', lines);
+    if (cows.length === 0) return gameOver('The herd collapsed', 'Every cow on Earth is gone. No cows means no milk, so the whole operation fails. That\'s the tragedy of the commons.', lines);
+    if (S.night > S.maxNights) return gameOver('Mission complete', 'Ten nights are over. Milk still in transit doesn\'t count.', lines);
+
+    // Next event
+    const id = S.night === 2 ? 'calm' : EVENT_POOL[Math.floor(Math.random() * EVENT_POOL.length)];
+    S.event = EVENTS[id];
+    if (id === 'podcast') S.susp = clamp(S.susp + 1, 0, 10);
+    if (id === 'crop') S.susp = clamp(S.susp - 1, 0, 10);
+    if (id === 'tailwind') S.fuel = Math.min(13, S.fuel + 3);
+    if (id === 'madCow' && S.pen.length) S.pen[Math.floor(Math.random() * S.pen.length)].grumpy = true;
+
+    openModal(`Dawn report: night ${S.night - 1}`,
+      `<ul>${lines.map(l => `<li>${l}</li>`).join('')}</ul>
+       <div class="note" style="margin-top:4px">Next up: <b>${S.event.name}.</b> ${S.event.text}</div>
+       ${why.length ? `<div class="why">${why.join('<br>')}</div>` : ''}`,
+      `Start night ${S.night}`, () => {});
+    renderUI();
+  }
+
+  function gameOver(title, text, lines) {
+    S.over = true;
+    renderUI();
+    openModal(title,
+      `<p style="margin:0">${text}</p>
+       <ul>${lines.map(l => `<li>${l}</li>`).join('')}</ul>
+       <div class="tile" style="text-align:center"><span class="k">Final score</span><span class="v" style="font-size:28px">${S.credits} credits</span><span class="note">${S.delivered} gallons delivered · ${cows.length} cows left on Earth</span></div>`,
+      'Play again', newGame);
+  }
+
+  const modal = document.getElementById('modal');
+  let modalCb = null;
+  function openModal(title, html, btn, cb) {
+    document.getElementById('mTitle').textContent = title;
+    document.getElementById('mBody').innerHTML = html;
+    document.getElementById('mBtn').textContent = btn;
+    modalCb = cb; modal.classList.add('open');
+    keys.left = keys.right = keys.space = false;
+    document.getElementById('mBtn').focus();
+  }
+  document.getElementById('mBtn').addEventListener('click', () => { modal.classList.remove('open'); const cb = modalCb; modalCb = null; if (cb) cb(); });
+
+  // ---------- UI ----------
+  function segs(el, n, max, colorFn) {
+    el.innerHTML = '';
+    for (let i = 0; i < 10; i++) { const s = document.createElement('i'); if (i < Math.round(n / max * 10)) s.style.background = colorFn(i); el.appendChild(s); }
+  }
+  function suspLabel(s) { return s >= 10 ? 'Invasion' : s >= 7 ? 'Military patrols' : s >= 4 ? 'Rumors in town' : 'Quiet'; }
+
+  function renderUI() {
+    const $ = id => document.getElementById(id);
+    $('hNight').textContent = `${Math.min(S.night, S.maxNights)} / ${S.maxNights}`;
+    $('hNightNote').textContent = `${Math.max(0, S.maxNights - S.night)} nights left after this one`;
+    $('hFuel').textContent = S.fuel;
+    segs($('fuelSegs'), Math.min(S.fuel, 10), 10, () => '#ffc65a');
+    $('hCredits').textContent = S.credits;
+    $('hSusp').textContent = `${S.susp} / 10`;
+    segs($('suspSegs'), S.susp, 10, i => i >= 6 ? '#ff6b6b' : i >= 3 ? '#ffb35a' : '#7ee0a1');
+    $('hSuspNote').innerHTML = `${suspLabel(S.susp)} · <b>${S.pending >= 0 ? '+' : ''}${S.pending}</b> at dawn`;
+    $('eventName').textContent = S.event.name;
+    $('eventText').textContent = S.event.text;
+
+    $('penCount').textContent = `${S.pen.length} / ${S.penCap}`;
+    const pl = $('penList'); pl.innerHTML = '';
+    if (!S.pen.length) pl.innerHTML = '<div class="empty">No cows aboard yet. Fly over a farm and hold the beam.</div>';
+    S.pen.forEach((c, i) => {
+      const row = document.createElement('div'); row.className = 'cow-row';
+      const st = c.grumpy ? ['grumpy', 'Grumpy'] : !c.rested ? ['rest', 'Resting'] : c.milked ? ['done', 'Milked'] : ['ready', 'Ready to milk'];
+      row.innerHTML = `<span class="name">${c.name}${c.calf ? ' (calf)' : ''}</span><span class="chip ${st[0]}">${st[1]}</span>`;
+      const b = document.createElement('button'); b.className = 'small'; b.textContent = 'Release';
+      b.title = 'Drop this cow on the farm below. −1 suspicion at dawn.';
+      b.addEventListener('click', () => release(i));
+      row.appendChild(b); pl.appendChild(row);
+    });
+    const ready = S.pen.some(c => c.rested && !c.milked && !c.grumpy);
+    $('btnMilk').disabled = S.over || !ready;
+    $('btnShip').disabled = S.over || !tankTotal() || S.fuel < 1;
+    $('btnEnd').disabled = S.over;
+    $('btnEnd').textContent = S.night >= S.maxNights ? 'End final night' : 'End night';
+
+    $('shipList').innerHTML = S.ships.length
+      ? 'In transit: ' + S.ships.map(s => `<b style="color:var(--ink)">${s.amt} gal</b> arrives in ${s.eta} night${s.eta > 1 ? 's' : ''}`).join(' · ')
+      : 'No shipments in transit.';
+
+    $('fHerd').textContent = cows.length;
+    $('fPen').textContent = `${S.pen.length} / ${S.penCap}`;
+    $('fTank').textContent = `${tankTotal()} / ${S.tankCap}`;
+    $('fTransit').textContent = transitTotal();
+    $('fCredits').textContent = S.credits;
+    $('lRisk').textContent = Math.round(spotRisk() * 100) + '%';
+    $('lPending').textContent = (S.pending >= 0 ? '+' : '') + S.pending;
+  }
+
+  // ---------- Simulation ----------
+  let herdShown = -1;
+  function update(dt) {
+    t += dt;
+    const active = !S.over && !modalOpen();
+    const dir = (keys.right || btnDir === 1 ? 1 : 0) - (keys.left || btnDir === -1 ? 1 : 0);
+    if (active && dir) ufo.vx += dir * 1500 * dt;
+    else if (active && pointerX != null) ufo.vx += ((pointerX - ufo.x) * 9 - ufo.vx * 3) * dt * 2;
+    ufo.vx *= Math.pow(0.86, dt * 60);
+    ufo.vx = clamp(ufo.vx, -420, 420);
+    ufo.x = clamp(ufo.x + ufo.vx * dt, 50, W - 50);
+
+    const beaming = active && (keys.space || btnBeam || canvasHold);
+    ufo.beaming = beaming;
+
+    if (beaming && !lifting) {
+      const cand = cows.filter(c => c.state === 'graze' && Math.abs(c.x - ufo.x) < 36).sort((a, b) => Math.abs(a.x - ufo.x) - Math.abs(b.x - ufo.x))[0];
+      if (cand) {
+        if (S.pen.length >= S.penCap) say('Pen full. Milk, ship, or release cows.', ufo.x, ufo.y - 34, '#ffb35a', 'pen');
+        else if (S.fuel < 2) say('Not enough fuel. End the night to refuel.', ufo.x, ufo.y - 34, '#ff6b6b', 'fuel');
+        else { lifting = cand; cand.state = 'lift'; cand.liftT = 0; cand.spotted = Math.random() < spotRisk(); }
+      }
+    }
+    if (lifting) {
+      const c = lifting;
+      if (!beaming) { c.state = 'fall'; c.vy = 0; lifting = null; }
+      else {
+        c.liftT += dt / 1.25;
+        c.x += (ufo.x - c.x) * Math.min(1, dt * 5);
+        const e = 1 - Math.pow(1 - Math.min(c.liftT, 1), 2);
+        c.y = GROUND - (GROUND - (ufo.y + 34)) * e;
+        c.rot += dt * 2.4 * c.dir;
+        if (c.spotted && c.liftT > 0.5) {
+          c.state = 'fall'; c.vy = 0; lifting = null;
+          const fi = farmAt(c.x); FARMS[fi].alert = 2.2;
+          S.pending += 1; S.fuel = Math.max(0, S.fuel - 1);
+          say(`HEY! Farmer ${FARMS[fi].name} spotted you!  +1 suspicion`, c.x, c.y - 30, '#ff6b6b');
+          renderUI();
+        } else if (c.liftT >= 1) { lifting = null; completeAbduction(c); }
+      }
+    }
+
+    for (const c of cows) {
+      if (c.state === 'fall') {
+        c.vy += 1000 * dt; c.y += c.vy * dt; c.rot *= Math.pow(0.9, dt * 60);
+        if (c.y >= GROUND) {
+          c.y = GROUND; c.state = 'graze'; c.rot = 0; c.vy = 0;
+          c.farm = farmAt(c.x); const f = FARMS[c.farm];
+          c.x = clamp(c.x, f.x0 + 66, f.x1 - 18);
+        }
+      } else if (c.state === 'graze') {
+        c.timer -= dt;
+        if (c.timer <= 0) { c.timer = 1.5 + Math.random() * 3; c.vx = Math.random() < 0.45 ? 0 : (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 14); if (c.vx) c.dir = Math.sign(c.vx); }
+        const f = FARMS[c.farm];
+        c.x += c.vx * dt;
+        if (c.x < f.x0 + 66) { c.x = f.x0 + 66; c.vx = Math.abs(c.vx); c.dir = 1; }
+        if (c.x > f.x1 - 18) { c.x = f.x1 - 18; c.vx = -Math.abs(c.vx); c.dir = -1; }
+        if (c.vx) c.walk += dt * 8;
+      }
+    }
+    FARMS.forEach(f => f.alert = Math.max(0, f.alert - dt));
+    floats.forEach(f => { f.life -= dt; f.y -= 16 * dt; });
+    floats = floats.filter(f => f.life > 0);
+    if (cows.length !== herdShown) { herdShown = cows.length; document.getElementById('fHerd').textContent = cows.length; }
+  }
+
+  // ---------- Drawing ----------
+  function ellipse(x, y, rx, ry, fill, stroke) {
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1.2; ctx.stroke(); }
+  }
+
+  function drawSky() {
+    const g = ctx.createLinearGradient(0, 0, 0, GROUND);
+    g.addColorStop(0, '#070a26'); g.addColorStop(0.65, '#151a52'); g.addColorStop(1, '#2a2868');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, GROUND);
+    for (const s of stars) {
+      ctx.globalAlpha = reduceMotion ? 0.7 : 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * 1.6 + s.p));
+      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    const full = S.event.id === 'fullMoon';
+    const mx = 860, my = 64, mr = full ? 30 : 20;
+    const glow = ctx.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * (full ? 4 : 2.6));
+    glow.addColorStop(0, full ? 'rgba(255,244,210,0.35)' : 'rgba(255,244,210,0.18)'); glow.addColorStop(1, 'rgba(255,244,210,0)');
+    ctx.fillStyle = glow; ctx.fillRect(mx - 140, my - 140, 280, 280);
+    ellipse(mx, my, mr, mr, '#fff4d6');
+    if (!full) ellipse(mx + 9, my - 5, mr * 0.92, mr * 0.92, '#0d1136');
+    // hills
+    ctx.fillStyle = '#121845';
+    ctx.beginPath(); ctx.moveTo(0, GROUND);
+    for (let x = 0; x <= W; x += 20) ctx.lineTo(x, GROUND - 60 - Math.sin(x / 130) * 26 - Math.sin(x / 47) * 6);
+    ctx.lineTo(W, GROUND); ctx.fill();
+    ctx.fillStyle = '#17204f';
+    ctx.beginPath(); ctx.moveTo(0, GROUND);
+    for (let x = 0; x <= W; x += 20) ctx.lineTo(x, GROUND - 28 - Math.sin(x / 90 + 2) * 14);
+    ctx.lineTo(W, GROUND); ctx.fill();
+  }
+
+  function drawSearchlights() {
+    if (S.susp < 7) return;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    [[150, 0.9], [810, 1.3]].forEach(([bx, sp], i) => {
+      const a = -Math.PI / 2 + Math.sin(t * sp * 0.6 + i * 2) * 0.55;
+      const len = 520, spread = 0.07;
+      ctx.beginPath(); ctx.moveTo(bx, GROUND);
+      ctx.lineTo(bx + Math.cos(a - spread) * len, GROUND + Math.sin(a - spread) * len);
+      ctx.lineTo(bx + Math.cos(a + spread) * len, GROUND + Math.sin(a + spread) * len);
+      ctx.closePath();
+      const g = ctx.createLinearGradient(bx, GROUND, bx + Math.cos(a) * len, GROUND + Math.sin(a) * len);
+      g.addColorStop(0, 'rgba(255,240,200,0.20)'); g.addColorStop(1, 'rgba(255,240,200,0)');
+      ctx.fillStyle = g; ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  function drawGround() {
+    ctx.fillStyle = '#1a3a2b'; ctx.fillRect(0, GROUND - 4, W, H - GROUND + 4);
+    ctx.fillStyle = '#245038'; ctx.fillRect(0, GROUND - 4, W, 6);
+    FARMS.forEach((f, fi) => {
+      // barn
+      const bx = f.x0 + 12, by = GROUND - 42;
+      ctx.fillStyle = '#7d2a2e'; ctx.fillRect(bx, by, 44, 42);
+      ctx.fillStyle = '#5c1d22'; ctx.beginPath(); ctx.moveTo(bx - 4, by); ctx.lineTo(bx + 22, by - 18); ctx.lineTo(bx + 48, by); ctx.fill();
+      ctx.strokeStyle = '#e9dccb'; ctx.lineWidth = 1.5; ctx.strokeRect(bx + 14, by + 18, 16, 24);
+      ctx.beginPath(); ctx.moveTo(bx + 14, by + 18); ctx.lineTo(bx + 30, by + 42); ctx.moveTo(bx + 30, by + 18); ctx.lineTo(bx + 14, by + 42); ctx.stroke();
+      const lit = f.alert > 0;
+      ctx.fillStyle = lit ? '#ffd76a' : '#2b2440'; ctx.fillRect(bx + 17, by + 4, 10, 9);
+      if (lit) {
+        const g = ctx.createRadialGradient(bx + 22, by + 8, 2, bx + 22, by + 8, 60);
+        g.addColorStop(0, 'rgba(255,215,106,0.45)'); g.addColorStop(1, 'rgba(255,215,106,0)');
+        ctx.fillStyle = g; ctx.fillRect(bx - 40, by - 50, 124, 110);
+        ctx.fillStyle = '#ff6b6b'; ctx.font = '700 22px "Bungee", sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('!', bx + 22, by - 24 + Math.sin(t * 12) * 2);
+      }
+      // fence on right edge
+      if (fi < 3) {
+        ctx.strokeStyle = '#6b5a45'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(f.x1, GROUND - 30); ctx.lineTo(f.x1, GROUND + 2); ctx.stroke();
+        ctx.lineWidth = 2; ctx.beginPath();
+        ctx.moveTo(f.x1 - 10, GROUND - 24); ctx.lineTo(f.x1 + 10, GROUND - 24);
+        ctx.moveTo(f.x1 - 10, GROUND - 12); ctx.lineTo(f.x1 + 10, GROUND - 12); ctx.stroke();
+      }
+      // label
+      const n = cows.filter(c => c.farm === fi && c.state !== 'lift').length;
+      ctx.textAlign = 'center'; ctx.font = '600 13px "IBM Plex Sans", sans-serif';
+      ctx.fillStyle = n < 3 ? '#ff9a8a' : '#cfe6d6';
+      ctx.fillText(`${f.name} Farm · ${n} cow${n === 1 ? '' : 's'}${n < 3 ? ' · not breeding' : ''}`, (f.x0 + f.x1) / 2, GROUND + 40);
+    });
+  }
+
+  function drawCow(c) {
+    const s = c.calf ? 0.66 : 1;
+    ctx.save();
+    ctx.translate(c.x, c.y - 16 * s);
+    ctx.rotate(c.rot);
+    ctx.scale(c.dir * s, s);
+    const sw = c.state === 'graze' && c.vx ? Math.sin(c.walk) * 2.5 : (c.state === 'lift' ? Math.sin(t * 18) * 3 : 0);
+    ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+    ctx.beginPath();
+    [[-9, sw], [-5, -sw], [6, -sw], [10, sw]].forEach(([lx, o]) => { ctx.moveTo(lx, 6); ctx.lineTo(lx + o, 16); });
+    ctx.stroke();
+    ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-15, -3); ctx.quadraticCurveTo(-20, 0, -18, 7); ctx.stroke();
+    ellipse(0, 0, 16, 9.5, '#f5f2ea', '#2a2a2a');
+    ellipse(-6, -2, 4.5, 3.4, '#222');
+    ellipse(5, 3, 3.4, 2.6, '#222');
+    ellipse(-11, 3, 2.2, 2, '#222');
+    ellipse(3, 9, 3.2, 2, '#f0a9b4');
+    ellipse(17, -5, 6.5, 5.5, '#f5f2ea', '#2a2a2a');
+    ellipse(21.5, -3, 3.6, 3, '#f0b8b8');
+    ellipse(15.5, -7.5, 1.2, 1.2, '#111');
+    ctx.strokeStyle = '#d9cfb8'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(14, -10); ctx.lineTo(12, -14); ctx.moveTo(18, -10.5); ctx.lineTo(19, -15); ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBeam() {
+    if (!ufo.beaming) return;
+    const x = ufo.x, top = ufo.y + 14 + bob();
+    ctx.save();
+    const g = ctx.createLinearGradient(0, top, 0, GROUND);
+    const flick = reduceMotion ? 0 : Math.sin(t * 30) * 0.04;
+    g.addColorStop(0, `rgba(159,239,255,${0.5 + flick})`); g.addColorStop(1, 'rgba(159,239,255,0.08)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(x - 14, top); ctx.lineTo(x + 14, top); ctx.lineTo(x + 52, GROUND + 4); ctx.lineTo(x - 52, GROUND + 4); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(200,250,255,0.35)'; ctx.lineWidth = 1.5;
+    for (let i = 0; i < 4; i++) {
+      const p = ((t * 0.9 + i / 4) % 1);
+      const yy = top + (GROUND - top) * p, half = 14 + 38 * p;
+      ctx.globalAlpha = 1 - p;
+      ctx.beginPath(); ctx.ellipse(x, yy, half, 3 + 3 * p, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+    ellipse(x, GROUND + 2, 52, 6, 'rgba(159,239,255,0.18)');
+  }
+
+  const bob = () => reduceMotion ? 0 : Math.sin(t * 2.2) * 3;
+  function drawUFO() {
+    const x = ufo.x, y = ufo.y + bob(), tilt = clamp(ufo.vx / 1400, -0.18, 0.18);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(tilt);
+    const halo = ctx.createRadialGradient(0, 4, 10, 0, 4, 90);
+    halo.addColorStop(0, 'rgba(159,239,255,0.18)'); halo.addColorStop(1, 'rgba(159,239,255,0)');
+    ctx.fillStyle = halo; ctx.fillRect(-100, -80, 200, 170);
+    // dome + pilot
+    ctx.beginPath(); ctx.ellipse(0, -6, 25, 22, 0, Math.PI, 0); ctx.closePath();
+    ctx.fillStyle = 'rgba(170,225,255,0.28)'; ctx.fill(); ctx.strokeStyle = 'rgba(200,240,255,0.7)'; ctx.lineWidth = 1.2; ctx.stroke();
+    ellipse(0, -14, 8, 8.5, '#b8a3ff');
+    ellipse(-3, -15, 2.2, 3.2, '#111'); ellipse(3, -15, 2.2, 3.2, '#111');
+    ctx.strokeStyle = '#b8a3ff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(4, -29); ctx.stroke(); ellipse(4, -29, 2, 2, '#ffc65a');
+    // saucer
+    const g = ctx.createLinearGradient(0, -12, 0, 12);
+    g.addColorStop(0, '#e3e8f3'); g.addColorStop(0.55, '#9aa3b9'); g.addColorStop(1, '#5f677e');
+    ellipse(0, 0, 60, 13, g, '#3e455a');
+    ellipse(0, 5, 44, 6, '#4a5167');
+    const colors = ['#ffc65a', '#9fefff', '#ff8fb1', '#7ee0a1'];
+    for (let i = 0; i < 7; i++) {
+      const lx = -42 + i * 14, on = Math.floor(t * 5 + i) % 4;
+      ellipse(lx, 2, 3, 2.4, colors[on]);
+    }
+    ellipse(0, 11, 13, 3.6, ufo.beaming ? '#c9f8ff' : '#2d3346');
+    ctx.restore();
+  }
+
+  function drawFloats() {
+    ctx.textAlign = 'center'; ctx.font = '600 14px "IBM Plex Sans", sans-serif';
+    for (const f of floats) {
+      ctx.globalAlpha = Math.min(1, f.life / (f.max * 0.4));
+      const x = clamp(f.x, 150, W - 150);
+      ctx.fillStyle = 'rgba(7,9,32,0.75)';
+      const w = ctx.measureText(f.text).width + 16;
+      ctx.fillRect(x - w / 2, f.y - 16, w, 22);
+      ctx.fillStyle = f.color; ctx.fillText(f.text, x, f.y);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    drawSky();
+    drawSearchlights();
+    drawGround();
+    drawBeam();
+    cows.filter(c => c.state !== 'lift').forEach(drawCow);
+    cows.filter(c => c.state === 'lift').forEach(drawCow);
+    drawUFO();
+    drawFloats();
+  }
+
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    update(dt); draw();
+    requestAnimationFrame(loop);
+  }
+
+  newGame();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

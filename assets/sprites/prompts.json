@@ -1,0 +1,134 @@
+{
+  "generator": "Built-in image_gen tool",
+  "referenceArt": [
+    "assets/FieldBg.png",
+    "assets/MarketBg.png",
+    "assets/InShipBg.png",
+    "assets/UISpriteSheet.png"
+  ],
+  "processing": "Nearest-neighbor resizing preserves generated alpha. Cow sprites use one static idle frame at 512x331; original grazing rows were removed.",
+  "assets": [
+    {
+      "key": "base",
+      "destination": "assets/sprites/cow-base.png",
+      "size": [
+        512,
+        331
+      ],
+      "frames": 1,
+      "prompt": "Use case: style-transfer. Asset type: production transparent 2-frame cow sprite sheet for a browser pixel-art game. Reference image 1 (FieldBg) and reference image 2 (UISpriteSheet) define the REQUIRED art style: chunky hand-placed square pixels, dark near-black plum stepped outlines, restrained warm pastel palette, three-tone cluster shading, cozy retro farm/space game. Reference image 3 is the existing cow to redesign, preserving its flavor identity, right-facing side view and anatomy, but improve the art to match the backgrounds. No smooth vector contours, no photorealism, no fine grain or blur, no ground or shadow, no text, no labels or grid. Produce a portrait transparent PNG, ideally 1024x1344. EXACTLY TWO equal-height rectangular frames stacked vertically (one column, two rows). Each frame contains ONE complete cow, tail left, head right, four short visible legs and hooves, clear head muzzle horns and ears, with comfortable transparent margins on all sides. Same scale and same foot baseline relative to each cell. Upper frame: standing head-up idle. Lower frame: same cow grazing head lowered to hoof level; keep torso position, leg position and scale fixed. A compact friendly farm cow with a rounded rectangular torso, readable at 100px wide. Frame width to frame height is about 1.52. True transparent background throughout. Cow identity: BASE / Holstein. Warm ivory coat, charcoal patches, pink muzzle and udder, small cream horns, dark gray hooves and a brown tail tuft. Use the same muted, softly shaded ivory/charcoal cow visible in the reference UI sheet, with stronger readable pixel clusters.",
+      "sourceFilename": "exec-76cf040f-efc6-44f5-98a4-50971e397ce5.png"
+    },
+    {
+      "key": "chocolate",
+      "destination": "assets/sprites/cow-chocolate.png",
+      "size": [
+        512,
+        331
+      ],
+      "frames": 1,
+      "prompt": "Use case: style-transfer. Asset type: production transparent 2-frame cow sprite sheet for a browser pixel-art game. Reference image 1 (FieldBg) and reference image 2 (UISpriteSheet) define the REQUIRED art style: chunky hand-placed square pixels, dark near-black plum stepped outlines, restrained warm pastel palette, three-tone cluster shading, cozy retro farm/space game. Reference image 3 is the existing cow to redesign, preserving its flavor identity, right-facing side view and anatomy, but improve the art to match the backgrounds. No smooth vector contours, no photorealism, no fine grain or blur, no ground or shadow, no text, no labels or grid. Produce a portrait transparent PNG, ideally 1024x1344. EXACTLY TWO equal-height rectangular frames stacked vertically (one column, two rows). Each frame contains ONE complete cow, tail left, head right, four short visible legs and hooves, clear head muzzle horns and ears, with comfortable transparent margins on all sides. Same scale and same foot baseline relative to each cell. Upper frame: standing head-up idle. Lower frame: same cow grazing head lowered to hoof level; keep torso position, leg position and scale fixed. A compact friendly farm cow with a rounded rectangular torso, readable at 100px wide. Frame width to frame height is about 1.52. True transparent background throughout. Reference image 3 is the APPROVED new base cow sheet: match its scale, anatomy, outline, shading, sheet layout and frame baselines closely. Reference image 4 is the old flavor design whose identity should remain recognizable. CHOCOLATE cow: cocoa-brown coat with dark chocolate patches, caramel edge highlights, dusty pink muzzle and udder, cream horns. Preserve the base reference cow anatomy, scale and pixel style, using browns instead of charcoal and ivory.",
+      "sourceFilename": "exec-b9a78d5f-30ef-499b-9ddb-a3b3d65ab5e8.png"
+    },
+    {
+      "key": "strawberry",
+      "destination": "assets/sprites/cow-strawberry.png",
+      "size": [
+        512,
+        331
+      ],
+      "frames": 1,
+      "prompt": "Use case: style-transfer. Asset type: production transparent 2-frame cow sprite sheet for a browser pixel-art game. Reference image 1 (FieldBg) and reference image 2 (UISpriteSheet) define the REQUIRED art style: chunky hand-placed square pixels, dark near-black plum stepped outlines, restrained warm pastel palette, three-tone cluster shading, cozy retro farm/space game. Reference image 3 is the existing cow to redesign, preserving its flavor identity, right-facing side view and anatomy, but improve the art to match the backgrounds. No smooth vector contours, no photorealism, no fine grain or blur, no ground or shadow, no text, no labels or grid. Produce a portrait transparent PNG, ideally 1024x1344. EXACTLY TWO equal-height rectangular frames stacked vertically (one column, two rows). Each frame contains ONE complete cow, tail left, head right, four short visible legs and hooves, clear head muzzle horns and ears, with comfortable transparent margins on all sides. Same scale and same foot baseline relative to each cell. Upper frame: standing head-up idle. Lower frame: same cow grazing head lowered to hoof level; keep torso position, leg position and scale fixed. A compact friendly farm cow with a rounded rectangular torso, readable at 100px wide. Frame width to frame height is about 1.52. True transparent background throughout. Reference image 3 is the APPROVED new base cow sheet: match its scale, anatomy, outline, shading, sheet layout and frame baselines closely. Reference image 4 is the old flavor design whose identity should remain recognizable. STRAWBERRY cow: muted strawberry pink coat with pale blush cream patches, dusty rose shadows, soft pink muzzle and udder, cream horns. Use warm pastel berry colors fitting the reference world, avoid neon magenta.",
+      "sourceFilename": "exec-1234a09a-23fa-4ed3-b823-cd5cac275bc2.png"
+    },
+    {
+      "key": "doughnut",
+      "destination": "assets/sprites/cow-doughnut.png",
+      "size": [
+        512,
+        331
+      ],
+      "frames": 1,
+      "prompt": "Use case: style-transfer. Asset type: production transparent 2-frame cow sprite sheet for a browser pixel-art game. Reference image 1 (FieldBg) and reference image 2 (UISpriteSheet) define the REQUIRED art style: chunky hand-placed square pixels, dark near-black plum stepped outlines, restrained warm pastel palette, three-tone cluster shading, cozy retro farm/space game. Reference image 3 is the existing cow to redesign, preserving its flavor identity, right-facing side view and anatomy, but improve the art to match the backgrounds. No smooth vector contours, no photorealism, no fine grain or blur, no ground or shadow, no text, no labels or grid. Produce a portrait transparent PNG, ideally 1024x1344. EXACTLY TWO equal-height rectangular frames stacked vertically (one column, two rows). Each frame contains ONE complete cow, tail left, head right, four short visible legs and hooves, clear head muzzle horns and ears, with comfortable transparent margins on all sides. Same scale and same foot baseline relative to each cell. Upper frame: standing head-up idle. Lower frame: same cow grazing head lowered to hoof level; keep torso position, leg position and scale fixed. A compact friendly farm cow with a rounded rectangular torso, readable at 100px wide. Frame width to frame height is about 1.52. True transparent background throughout. Reference image 3 is the APPROVED new base cow sheet: match its scale, anatomy, outline, shading, sheet layout and frame baselines closely. Reference image 4 is the old flavor design whose identity should remain recognizable. DOUGHNUT / COFFEE cow: warm golden pastry-colored cow with a thick drippy soft strawberry-pink icing blanket over its back, a few small cream mint and gold sprinkle pixels, cinnamon shadows, pink muzzle, cream horns. Preserve the existing frosting-covered cow concept, no actual doughnut accessory.",
+      "sourceFilename": "exec-ad118e83-ad2c-4b62-a2ee-fde663588fbd.png"
+    },
+    {
+      "key": "almond",
+      "destination": "assets/sprites/cow-almond.png",
+      "size": [
+        512,
+        331
+      ],
+      "frames": 1,
+      "prompt": "Use case: precise-object-edit. Edit target: the attached existing pixel-art almond cow sprite sheet. Primary request: remove the entire cow head, neck, horns, ears, face, muzzle AND tail. The character must be JUST ONE almond shell with four short cow legs and dark hooves, no other body parts. Preserve the top frame's rich cinnamon almond-shell ridges, chunky dark-plum stepped pixel outline, warm shading, and the same short tan legs with dark hooves. Repair the almond's right edge into a smooth pointed almond-shell silhouette where the head was attached. Deliver ONLY ONE static idle sprite (NOT a sheet, NOT two rows), wide landscape aspect about 512:331. Center the complete almond-with-four-legs on a genuine transparent background, with clear transparent margins on all sides and all hooves visible. Keep the almond body horizontal and use the same pixel scale and art style. No head, neck, face, eyes, mouth, ears, horns, tail, arms, grazing pose, ground shadow, text, label, border, glow, or background.",
+      "sourceFilename": "exec-e656c350-5079-41a5-9524-0b5bdc3cb365.png",
+      "previousPrompt": "Use case: style-transfer. Asset type: production transparent 2-frame cow sprite sheet for a browser pixel-art game. Reference image 1 (FieldBg) and reference image 2 (UISpriteSheet) define the REQUIRED art style: chunky hand-placed square pixels, dark near-black plum stepped outlines, restrained warm pastel palette, three-tone cluster shading, cozy retro farm/space game. Reference image 3 is the existing cow to redesign, preserving its flavor identity, right-facing side view and anatomy, but improve the art to match the backgrounds. No smooth vector contours, no photorealism, no fine grain or blur, no ground or shadow, no text, no labels or grid. Produce a portrait transparent PNG, ideally 1024x1344. EXACTLY TWO equal-height rectangular frames stacked vertically (one column, two rows). Each frame contains ONE complete cow, tail left, head right, four short visible legs and hooves, clear head muzzle horns and ears, with comfortable transparent margins on all sides. Same scale and same foot baseline relative to each cell. Upper frame: standing head-up idle. Lower frame: same cow grazing head lowered to hoof level; keep torso position, leg position and scale fixed. A compact friendly farm cow with a rounded rectangular torso, readable at 100px wide. Frame width to frame height is about 1.52. True transparent background throughout. Reference image 3 is the APPROVED new base cow sheet: match its scale, anatomy, outline, shading, sheet layout and frame baselines closely. Reference image 4 is the old flavor design whose identity should remain recognizable. ALMOND cow: preserve the whimsical almond-shell BODY motif of the original almond cow but make it a readable complete cow: rounded almond-brown oval torso with simple shell ridges, a small friendly cow head on the right, cream horns, tan ears and muzzle, four short cocoa hooves and a tail. Match the other cows' proportions and same idle/grazing poses. The almond shell is the torso, not a hat or separate object."
+    },
+    {
+      "key": "chocolate-bar",
+      "destination": "assets/sprites/chocolate-bar.png",
+      "size": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "prompt": "Use case: stylized-concept. Asset type: individual transparent inventory item sprite for Moo-ving Violations browser game. Reference images define the art style. A partly unwrapped chocolate bar, tilted slightly clockwise, six chunky cocoa chocolate squares exposed above a folded warm ivory and muted lavender paper wrapper. No lettering. Exactly ONE centered isolated object with ample transparent margin, occupying 75% of a square canvas. True pixel art: chunky stepped dark-plum outline, large visible square pixel clusters, 3-tone shading, limited cozy warm palette matching the milk bottles and pixel UI reference. Target readability at 32x32 pixels. No tiny texture, no photorealism, no smooth vector lines, no glow, no cast shadow, no ground, no text, no labels, no border or UI card. Genuine transparent background.",
+      "sourceFilename": "exec-f8289ed1-c7f4-4486-8130-9c725316246e.png"
+    },
+    {
+      "key": "strawberry-treat",
+      "destination": "assets/sprites/strawberry-treat.png",
+      "size": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "prompt": "Use case: stylized-concept. Asset type: individual transparent inventory item sprite for Moo-ving Violations browser game. Reference images define the art style. One ripe strawberry, plump muted berry-red fruit with a dark green leafy top, warm cream seed pixels and soft burgundy shadow pixels. No face. Exactly ONE centered isolated object with ample transparent margin, occupying 75% of a square canvas. True pixel art: chunky stepped dark-plum outline, large visible square pixel clusters, 3-tone shading, limited cozy warm palette matching the milk bottles and pixel UI reference. Target readability at 32x32 pixels. No tiny texture, no photorealism, no smooth vector lines, no glow, no cast shadow, no ground, no text, no labels, no border or UI card. Genuine transparent background.",
+      "sourceFilename": "exec-5d0aae2d-b442-4edf-8d25-5228d240cc43.png"
+    },
+    {
+      "key": "latte-cup",
+      "destination": "assets/sprites/latte-cup.png",
+      "size": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "prompt": "Use case: stylized-concept. Asset type: individual transparent inventory item sprite for Moo-ving Violations browser game. Reference images define the art style. One small cream ceramic coffee cup with a handle on the right, dark coffee surface, a small milk swirl, a muted mint band and a couple chunky steam pixels. No saucer. Exactly ONE centered isolated object with ample transparent margin, occupying 75% of a square canvas. True pixel art: chunky stepped dark-plum outline, large visible square pixel clusters, 3-tone shading, limited cozy warm palette matching the milk bottles and pixel UI reference. Target readability at 32x32 pixels. No tiny texture, no photorealism, no smooth vector lines, no glow, no cast shadow, no ground, no text, no labels, no border or UI card. Genuine transparent background.",
+      "sourceFilename": "exec-c198aff7-bd72-4971-8585-db37876902fe.png"
+    },
+    {
+      "key": "almond-treat",
+      "destination": "assets/sprites/almond-treat.png",
+      "size": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "prompt": "Use case: stylized-concept. Asset type: individual transparent inventory item sprite for Moo-ving Violations browser game. Reference images define the art style. One almond in its warm cinnamon-brown ridged shell, tilted gently diagonally, warm golden highlights and dark cocoa edge shadows. No face, no leaves. Exactly ONE centered isolated object with ample transparent margin, occupying 75% of a square canvas. True pixel art: chunky stepped dark-plum outline, large visible square pixel clusters, 3-tone shading, limited cozy warm palette matching the milk bottles and pixel UI reference. Target readability at 32x32 pixels. No tiny texture, no photorealism, no smooth vector lines, no glow, no cast shadow, no ground, no text, no labels, no border or UI card. Genuine transparent background.",
+      "sourceFilename": "exec-0f82a7a4-e924-4331-926d-b62b25d47a7e.png"
+    },
+    {
+      "key": "return-pod",
+      "destination": "assets/sprites/return-pod.png",
+      "size": [
+        256,
+        384
+      ],
+      "frames": 1,
+      "prompt": "Use case: stylized-concept. Asset type: production transparent ship-equipment sprite for Moo-ving Violations pixel-art game. A small upright cow return shuttle / escape pod, front view with a slight view of its right side, full complete silhouette including two short landing fins at the bottom. Rounded capsule housing in muted lavender-gray metal, thick dark plum pixel outline, mint-green circular glass porthole in the upper half, a closed inset hatch in the bottom half, a few warm amber indicator lights and a short squat engine nozzle. Compact friendly utilitarian shape matching the spacecraft and machines in the references. One isolated object on a transparent portrait 2:3 canvas, occupies 90% of canvas height and 85% of width. No flame, no ground, no cast shadow, no cables, no text or UI labels. Match the attached reference world's exact cozy retro pixel art: strong stepped near-black plum contours, large crisp square pixels, 3-tone clustered shading, restrained warm pastel colors. Front orthographic game sprite, no realistic rendering, no smooth vector edges, no blur or grain, no labels. Genuine transparent background.",
+      "sourceFilename": "exec-f644ec41-6a03-4fe1-8382-978450204a1c.png"
+    },
+    {
+      "key": "milker",
+      "destination": "assets/sprites/milker.png",
+      "size": [
+        384,
+        256
+      ],
+      "frames": 1,
+      "prompt": "Use case: stylized-concept. Asset type: production transparent ship-equipment sprite for Moo-ving Violations pixel-art game. A large overhead cow milking machine housing, front view, squat wide rectangular rounded metal box with a slightly curved top and four short downward milking nozzles along its lower rim. Muted lavender-gray metal armor with dark-plum outlines and large stepped edge highlights, mint-green horizontal status light, small warm amber lamp upper right, a simple embossed milk-drop emblem in its center, simple vents, bolted panels. A small blank dark nameplate in the upper center, and a long narrow dark progress-meter recess in the lower third, to overlay live HTML labels. It descends over and hides a cow in the game, so housing should be opaque. No cow, no tank, no floor, no hanging cables outside the silhouette. One isolated object, transparent landscape 3:2 canvas, housing occupies 94% width and 90% height. No text, no letters or numbers. Match the attached reference world's exact cozy retro pixel art: strong stepped near-black plum contours, large crisp square pixels, 3-tone clustered shading, restrained warm pastel colors. Front orthographic game sprite, no realistic rendering, no smooth vector edges, no blur or grain, no labels. Genuine transparent background.",
+      "sourceFilename": "exec-29b6361d-62d3-4a0c-9600-f4e74a498001.png"
+    }
+  ]
+}
