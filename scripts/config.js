@@ -7,7 +7,7 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..');
 const CONFIG_PATH = path.join(ROOT, 'game_config.yaml');
 const OUTPUT_PATH = path.join(ROOT, 'game', 'config.js');
-const ART = ['base', 'chocolate', 'strawberry', 'doughnut', 'almond']; // cow sprites that exist in assets/
+const ART = ['base', 'chocolate', 'strawberry', 'doughnut', 'almond', 'eggnog', 'skeleton']; // cow sprites that exist in assets/
 const SHIP_KEYS = ['milkTime', 'cowCap', 'bottleCap', 'stealth'];
 
 class ConfigError extends Error {}

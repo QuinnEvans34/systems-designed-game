@@ -55,6 +55,14 @@ cows:
     name: Almond cow
     milk: Almond milk
     milk_price: 150        # design doc: 150
+  eggnog:
+    name: Eggnog cow
+    milk: Eggnog
+    milk_price: 325        # festive tier, just over twice almond milk
+  skeleton:
+    name: Skeleton cow
+    milk: Skim milk
+    milk_price: 700        # final tier, just over twice eggnog
 
 # ---------------------------------------------------------------------
 #  Cow upgrade items (right market stand). Drag one onto a cow aboard
@@ -85,6 +93,18 @@ upgrade_items:
     turns: doughnut
     into: almond
     cost: 120              # design doc: 120
+  festiveSpice:
+    name: Festive spice
+    icon: "🎄"
+    turns: almond
+    into: eggnog
+    cost: 300              # earns back its cost in 2 bottles of added milk value
+  boneBiscuit:
+    name: Bone biscuit
+    icon: "🦴"
+    turns: eggnog
+    into: skeleton
+    cost: 650              # earns back its cost in 2 bottles of added milk value
 
 # ---------------------------------------------------------------------
 #  Ship upgrades (middle market stand).

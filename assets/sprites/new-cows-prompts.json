@@ -1,0 +1,90 @@
+{
+  "generator": "Built-in image_gen tool",
+  "processing": "Generated transparent RGBA images. Crop measured using alpha >128 solely to ignore near-invisible speckles in crop bounds; original image alpha is preserved unchanged. Fit sprites with nearest-neighbor resampling onto transparent 512x331, 96x96 or 34x80 canvases. Cow hooves share baseline y=323, maximum content size 490x311. Treat content fits 80x80, bottles 32x76.",
+  "assets": [
+    {
+      "key": "eggnogCow",
+      "destination": "assets/sprites/cow-eggnog.png",
+      "size": [
+        512,
+        331
+      ],
+      "sourceFilename": "exec-b920a70d-492f-4215-b898-8d2d8f970bcd.png",
+      "references": [
+        "assets/sprites/cow-base.png",
+        "assets/sprites/cow-doughnut.png"
+      ],
+      "prompt": "Use case: style-transfer. Asset type: ONE production transparent idle cow sprite for the pixel-art browser game Moo-ving Violations. Input image 1 (cow-base.png) and image 2 (cow-doughnut.png) are STYLE AND ANATOMY REFERENCES, not edit targets. Create a NEW EGGNOG COW: Christmas themed, warm pale eggnog-cream coat with subtle nutmeg-brown patches, a red Santa hat with ivory trim and pompom, a short festive dark green scarf with red accents. Preserve the exact friendly cow silhouette and right-facing side view of the references: long rounded rectangular torso, small head on right, tail left, four short legs with charcoal hooves, tiny cream horns, dusty pink muzzle and udder, dot eye. Match chunky square pixels, dark plum stepped outlines and simple warm pastel clustered shading. Wide landscape canvas about 3:2. One cow only, standing idle, complete feet on the same baseline, generous transparent margins. No scene, floor, shadow, lettering, labels, grid, effects, soft painting, blur or realistic texture. True transparent background. Pixel scale and proportions should look like a sibling of the supplied cow sprites at 512x331."
+    },
+    {
+      "key": "skeletonCow",
+      "destination": "assets/sprites/cow-skeleton.png",
+      "size": [
+        512,
+        331
+      ],
+      "sourceFilename": "exec-cdefaf42-74cd-4b6b-813d-6f2d60df9d12.png",
+      "references": [
+        "assets/sprites/cow-base.png",
+        "assets/sprites/cow-doughnut.png"
+      ],
+      "prompt": "Use case: style-transfer. Asset type: ONE transparent idle cow sprite for the cozy browser game Moo-ving Violations. Input images are STYLE/ANATOMY REFERENCES only. Create a NEW SKELETON COW, friendly and whimsical: complete ivory-bone bovine skeleton with a rounded long rib cage, visible curved ribs, spine, pelvis, four short articulated bony legs ending in dark charcoal hooves, thin bony tail on left and a cute cow skull facing right with cream horns and gentle dark eye socket. No flesh, gore or scary effects. Match the existing cow reference's chunky hand-placed square pixels, stepped near-black dark plum outlines, warm ivory highlights and muted lavender/brown bone shadows, simple three-tone clustered shading. Same long torso proportions, side-on standing idle pose and baseline as reference. All feet visible with transparent margins. One sprite only on a wide 3:2 canvas, readable at 100px wide. Output true transparent PNG with perfectly clear empty pixels around and BETWEEN bones. No ground, shadow, atmospheric glow, vignette, aura, gradients in empty space, text, frame or extra props. No soft painting or fine realistic texture."
+    },
+    {
+      "key": "festiveSpice",
+      "destination": "assets/sprites/festive-spice.png",
+      "size": [
+        96,
+        96
+      ],
+      "sourceFilename": "exec-06aa2fbb-15e0-427b-9428-ae6fd14270fe.png",
+      "references": [
+        "assets/sprites/latte-cup.png",
+        "assets/sprites/almond-treat.png"
+      ],
+      "prompt": "Use case: style-transfer. Asset type: ONE centered transparent inventory upgrade icon, final game size 96x96. Input images are STYLE REFERENCES for chunky pixel art with dark plum stepped outlines, restrained cozy pastel palette and simple clustered shading. Subject: FESTIVE SPICE, a small squat cream ceramic spice jar with a bright red lid, dark green ribbon and a tiny holly leaf on the jar front; a couple cinnamon sticks tucked behind the jar as part of this one grouped icon. This Christmas spice upgrades an almond cow into an eggnog cow. No lettering. Match the reference icon scale and simple readable silhouette. Square canvas, generous transparent margins. True transparent PNG. No background, ground, cast shadow, glow, aura, vignette, blur, photorealism, extra icons or labels."
+    },
+    {
+      "key": "boneBiscuit",
+      "destination": "assets/sprites/bone-biscuit.png",
+      "size": [
+        96,
+        96
+      ],
+      "sourceFilename": "exec-230d982e-acdb-4885-9c4e-7f146c39d21b.png",
+      "references": [
+        "assets/sprites/latte-cup.png",
+        "assets/sprites/almond-treat.png"
+      ],
+      "prompt": "Use case: style-transfer. Asset type: ONE centered transparent inventory upgrade icon, final game size 96x96. Input images are STYLE REFERENCES: chunky square pixel art, dark plum stepped outlines, warm pastel colors, simple three-tone shading. Subject: BONE BISCUIT, one friendly bone-shaped baked cookie, warm ivory with golden biscuit edges and a few simple toasted brown crumb pixels, tilted diagonally. Read clearly as a dog-bone-shaped edible biscuit used to upgrade an eggnog cow into a skeleton cow. Only one cookie. Square canvas, generous clear margins. True transparent PNG. No text, label, scene, background, ground, shadow, glow, vignette, aura, extra objects, blur or photoreal texture."
+    },
+    {
+      "key": "eggnogBottle",
+      "destination": "assets/sprites/bottle-eggnog.png",
+      "size": [
+        34,
+        80
+      ],
+      "sourceFilename": "exec-de37864a-20bf-4413-af44-98df798d5292.png",
+      "references": [
+        "assets/MiscItems.png",
+        "assets/sprites/latte-cup.png"
+      ],
+      "prompt": "Use case: style-transfer. Asset type: ONE transparent EGGNOG BOTTLE icon for this pixel-art game, to be displayed about 34x80 pixels. Input image 1 is the existing item sheet: match its upright narrow glass milk bottles, slim neck and cap, rectangular body, about 34:80 aspect ratio; do NOT copy the whole sheet. Image 2 supplies the warm chunky pixel shading style. Create ONE upright glass bottle filled with pale golden creamy eggnog with tiny nutmeg speckles, festive red cap and a small green holly emblem on the front, NO lettering. Thin dark plum stepped pixel outline with restrained warm cream and icy glass highlights. Full bottle complete, front view, centered with generous true transparent margins, portrait canvas. One bottle only. No mug, straw, scene, background, floor, shadow, glow, vignette, aura, text or extra objects. Simple clear silhouette readable at 34x80."
+    },
+    {
+      "key": "skimBottle",
+      "destination": "assets/sprites/bottle-skim.png",
+      "size": [
+        34,
+        80
+      ],
+      "sourceFilename": "exec-4df443a5-3dab-49d7-8e9d-b03cf4205c1e.png",
+      "references": [
+        "assets/MiscItems.png",
+        "assets/sprites/latte-cup.png"
+      ],
+      "prompt": "Use case: style-transfer. Asset type: ONE transparent SKIM MILK BOTTLE icon for this pixel-art game, displayed about 34x80 pixels. Input image 1 is the existing item sheet: match its upright narrow glass milk bottles, slim neck and cap, rectangular body, about 34:80 aspect ratio; do NOT copy the whole sheet. Image 2 supplies the warm chunky pixel shading style. Create ONE upright glass bottle filled with cool white skim milk with pale icy blue shading, dark slate blue cap and a small simple ivory bone emblem on a muted blue label. NO lettering. Thin dark plum stepped pixel outline with simple glass highlights and clustered pixel shading. Complete bottle centered front view with generous true transparent margins, portrait canvas. One bottle only. No mug, straw, scene, background, floor, shadow, glow, vignette, aura, text or extra objects. Readable at 34x80."
+    }
+  ]
+}

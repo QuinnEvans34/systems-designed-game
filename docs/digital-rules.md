@@ -29,10 +29,12 @@ These rules implement the game design document (high-level game flow, game items
 | Strawberry cow | Strawberry milk | 30 |
 | Doughnut cow | Coffee | 65 |
 | Almond cow | Almond milk | 150 |
+| Eggnog cow | Eggnog | 325 |
+| Skeleton cow | Skim milk | 700 |
 
 ## Cow upgrades (linear)
 
-Upgrades follow base → chocolate → strawberry → doughnut → almond. A step can't be skipped. Each item works only on the cow type directly before its output.
+Upgrades follow base → chocolate → strawberry → doughnut → almond → eggnog → skeleton. A step can't be skipped. Each item works only on the cow type directly before its output.
 
 | Item | Input cow | Output cow | Cost |
 | --- | --- | --- | --- |
@@ -40,6 +42,10 @@ Upgrades follow base → chocolate → strawberry → doughnut → almond. A ste
 | Strawberry | Chocolate | Strawberry | 50 |
 | Latte cup | Strawberry | Doughnut | 75 |
 | Almond | Doughnut | Almond | 120 |
+| Festive spice | Almond | Eggnog | 300 |
+| Bone biscuit | Eggnog | Skeleton | 650 |
+
+The two tiers after almond extend the milk-price progression by a little over 2× per tier. Their treats cost about two bottles of the added income: festive spice adds 175 coins per bottle and costs 300, while a bone biscuit adds 375 and costs 650. These are permanent upgrades, so they reward keeping a cow through later trips. The skeleton cow is the final tier; its premium skim milk follows the game's whimsical flavor progression.
 
 ## Ship upgrades (middle market stand)
 

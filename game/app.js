@@ -14,7 +14,7 @@
   };
   const art = (type, extra = '') => `<span class="cow-art ${type}${extra ? ' ' + extra : ''}"></span>`;
   const bottle = type => `<span class="bottle ${type}" aria-hidden="true"></span>`;
-  const ITEM_SPRITES = { chocolateBar: 'chocolate-bar', strawberry: 'strawberry-treat', latteCup: 'latte-cup', almond: 'almond-treat' };
+  const ITEM_SPRITES = { chocolateBar: 'chocolate-bar', strawberry: 'strawberry-treat', latteCup: 'latte-cup', almond: 'almond-treat', festiveSpice: 'festive-spice', boneBiscuit: 'bone-biscuit' };
   const icon = key => ITEM_SPRITES[key]
     ? `<span class="item-icon item-${ITEM_SPRITES[key]}" aria-hidden="true"></span>`
     : `<span class="item-icon" aria-hidden="true">${esc(G.ITEMS[key].icon)}</span>`;

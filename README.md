@@ -22,7 +22,7 @@ Choose **Play** to start freely, or **Play with tutorial** for Miso's short intr
 
 1. **Field.** Move the UFO with the mouse or **← →**. When a cow glows under it, **click or press Space** to beam it up. Each beam raises Earth's suspicion.
 2. **Ship.** The first cow aboard teleports onto an empty milking pad when you enter the ship. Click a cow hologram on the bottom control panel, or drag it onto the pad, to teleport another cow in. The podium beside the pad displays its name, status and milking progress. Press **MILK** on the overhead milker (or **M**). One cow gives one bottle of its milk.
-3. **Upgrade.** Click the **cow storage monitor** and drag a treat onto a cow: base → chocolate → strawberry → doughnut → almond.
+3. **Upgrade.** Click the **cow storage monitor** and drag a treat onto a cow: base → chocolate → strawberry → doughnut → almond → eggnog → skeleton. Festive spice turns an almond cow into a Christmas-themed eggnog cow; a bone biscuit turns an eggnog cow into a skeleton cow that gives skim milk.
 4. **Send it home.** Milked or upgraded cows are exhausted. Use the podium's down arrow or drag a cow onto the **return chute** and watch their pod fly away outside. The podium's return arrow teleports the cow back to storage. Exhausted cows rest in the field before they can be beamed again.
 5. **Market.** The left stand buys milk, the middle stand upgrades your ship, and the right stand sells new cows and treats.
 
@@ -76,6 +76,7 @@ Optional browser verification requires Playwright and the running local server:
 
 ```sh
 node tests/browser-smoke.cjs
+node tests/new-cows-smoke.cjs
 node tests/scenery-smoke.cjs
 node tests/field-animation.cjs
 node tests/ambient-art.cjs

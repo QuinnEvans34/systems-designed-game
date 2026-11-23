@@ -67,6 +67,8 @@ h1, h2, h3, p { margin: 0; }
 .bottle.strawberry { background-position: 48.857% 54.934%; }
 .bottle.doughnut { background-position: 85.429% 54.934%; }
 .bottle.almond { background-position: 12.286% 97.039%; }
+.bottle.eggnog { background: url('../assets/sprites/bottle-eggnog.png') center / contain no-repeat; }
+.bottle.skeleton { background: url('../assets/sprites/bottle-skim.png') center / contain no-repeat; }
 .coin-token, .bottle-token { display: inline-block; width: 30px; height: 30px; flex-shrink: 0; background: url('../assets/MiscItems.png') 50% 100% / 300% 300% no-repeat; }
 .bottle-token { background-position: 100% 0; }
 .coin-token.small { width: 20px; height: 20px; }
@@ -76,11 +78,15 @@ h1, h2, h3, p { margin: 0; }
 .cow-art.strawberry { background-image: url('../assets/sprites/cow-strawberry.png'); }
 .cow-art.doughnut { background-image: url('../assets/sprites/cow-doughnut.png'); }
 .cow-art.almond { background-image: url('../assets/sprites/cow-almond.png'); }
+.cow-art.eggnog { background-image: url('../assets/sprites/cow-eggnog.png'); }
+.cow-art.skeleton { background-image: url('../assets/sprites/cow-skeleton.png'); }
 .item-icon { display: inline-grid; place-items: center; width: 1.5em; height: 1.5em; flex-shrink: 0; font-size: 28px; line-height: 1; background: center / contain no-repeat; image-rendering: pixelated; filter: drop-shadow(0 2px 0 #0006); }
 .item-chocolate-bar { background-image: url('../assets/sprites/chocolate-bar.png'); }
 .item-strawberry-treat { background-image: url('../assets/sprites/strawberry-treat.png'); }
 .item-latte-cup { background-image: url('../assets/sprites/latte-cup.png'); }
 .item-almond-treat { background-image: url('../assets/sprites/almond-treat.png'); }
+.item-festive-spice { background-image: url('../assets/sprites/festive-spice.png'); }
+.item-bone-biscuit { background-image: url('../assets/sprites/bone-biscuit.png'); }
 
 /* ---------- field ---------- */
 .farm-scene { cursor: crosshair; }

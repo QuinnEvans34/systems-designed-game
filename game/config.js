@@ -34,6 +34,16 @@ window.MOO_CONFIG = {
       "name": "Almond cow",
       "milk": "Almond milk",
       "milk_price": 150
+    },
+    "eggnog": {
+      "name": "Eggnog cow",
+      "milk": "Eggnog",
+      "milk_price": 325
+    },
+    "skeleton": {
+      "name": "Skeleton cow",
+      "milk": "Skim milk",
+      "milk_price": 700
     }
   },
   "upgrade_items": {
@@ -64,6 +74,20 @@ window.MOO_CONFIG = {
       "turns": "doughnut",
       "into": "almond",
       "cost": 120
+    },
+    "festiveSpice": {
+      "name": "Festive spice",
+      "icon": "🎄",
+      "turns": "almond",
+      "into": "eggnog",
+      "cost": 300
+    },
+    "boneBiscuit": {
+      "name": "Bone biscuit",
+      "icon": "🦴",
+      "turns": "eggnog",
+      "into": "skeleton",
+      "cost": 650
     }
   },
   "ship_upgrades": {
