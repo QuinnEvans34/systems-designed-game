@@ -88,7 +88,7 @@ function validate(raw) {
     return String(v);
   };
   if (!raw || typeof raw !== 'object') throw new ConfigError('game_config.yaml is empty.');
-  known(raw, 'config', ['start', 'herd', 'cows', 'upgrade_items', 'ship_upgrades', 'suspicion', 'time']);
+  known(raw, 'config', ['start', 'herd', 'cows', 'upgrade_items', 'ship_upgrades', 'suspicion', 'goal', 'milker', 'time']);
   const out = {};
 
   const start = section(raw.start, 'start');
@@ -158,6 +158,27 @@ function validate(raw) {
   }
   const sus = section(raw.suspicion, 'suspicion');
   if (sus) { known(sus, 'suspicion', ['per_beam', 'limit', 'cooldown_per_second']); out.suspicion = { per_beam: num(sus, 'per_beam', 'suspicion', { min: 0 }), limit: num(sus, 'limit', 'suspicion', { above: 0 }), cooldown_per_second: num(sus, 'cooldown_per_second', 'suspicion', { min: 0 }) }; }
+  // goal and milker came from play-testing; older settings files without them get these defaults.
+  const goal = raw.goal === undefined ? { coins: 5000 } : section(raw.goal, 'goal');
+  if (goal) { known(goal, 'goal', ['coins']); out.goal = { coins: num(goal, 'coins', 'goal', { above: 0, int: true }) }; }
+  const milker = raw.milker === undefined
+    ? { wear_per_milking: 10, slow_below: 50, slow_multiplier: 2, break_chance: 0.05, worn_break_chance: 0.2, repair_cost: 15, repair_seconds: 20 }
+    : section(raw.milker, 'milker');
+  if (milker) {
+    known(milker, 'milker', ['wear_per_milking', 'slow_below', 'slow_multiplier', 'break_chance', 'worn_break_chance', 'repair_cost', 'repair_seconds']);
+    const p = 'milker';
+    out.milker = {
+      wear_per_milking: num(milker, 'wear_per_milking', p, { min: 0 }),
+      slow_below: num(milker, 'slow_below', p, { min: 0 }),
+      slow_multiplier: num(milker, 'slow_multiplier', p, { above: 0 }),
+      break_chance: num(milker, 'break_chance', p, { min: 0 }),
+      worn_break_chance: num(milker, 'worn_break_chance', p, { min: 0 }),
+      repair_cost: num(milker, 'repair_cost', p, { min: 0, int: true }),
+      repair_seconds: num(milker, 'repair_seconds', p, { min: 0 })
+    };
+    for (const k of ['break_chance', 'worn_break_chance']) if (out.milker[k] > 1) fail(`milker.${k}`, `is a chance from 0 to 1 (0.05 = 5%), not ${out.milker[k]}.`);
+    if (out.milker.slow_below > 100) fail('milker.slow_below', `is a condition from 0 to 100, not ${out.milker.slow_below}.`);
+  }
   const time = section(raw.time, 'time');
   if (time) { known(time, 'time', ['offline_hours']); out.time = { offline_hours: num(time, 'offline_hours', 'time', { min: 0 }) }; }
 

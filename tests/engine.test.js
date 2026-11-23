@@ -167,14 +167,21 @@ test('cows can be bought up to the 20-cow herd limit', () => {
 });
 
 test('a full loop from nothing earns enough to buy the first upgrades', () => {
-  const s = game();
+  // This checks the economy alone, so the milker never wears out or breaks here (maintenance.test.js covers that).
+  const cfg = loadConfig(path.join(__dirname, 'fixtures/design-doc-config.yaml'));
+  const E = require('../game/engine').withConfig({ ...cfg, milker: { ...cfg.milker, wear_per_milking: 0, break_chance: 0, worn_break_chance: 0 } });
+  const s = E.createGame(42); E.act(s, 'start');
+  const go = (...args) => { const r = E.act(s, ...args); assert.equal(r.ok, true, r.message); };
   for (let trip = 0; trip < 3; trip++) {
-    G.advance(s, G.REST); beam(s, 3); ok(s, 'travel', 'ship');
-    for (const c of [...s.ship]) { if (s.pad !== c.id) ok(s, 'pad', c.id); milkPad(s); ok(s, 'send', c.id); }
-    ok(s, 'travel', 'market'); ok(s, 'sellAll');
+    E.advance(s, E.REST); go('travel', 'farm');
+    for (let i = 0; i < 3; i++) go('beam', s.field.find(c => !E.resting(s, c)).id);
+    go('travel', 'ship');
+    for (const c of [...s.ship]) { if (s.pad !== c.id) go('pad', c.id); go('milk'); E.advance(s, E.milkTime(s)); go('send', c.id); }
+    go('travel', 'market'); go('sellAll');
   }
   assert.equal(s.coins, 45); assert.equal(s.sold.base, 9);
-  ok(s, 'buyItem', 'chocolateBar'); ok(s, 'shipUpgrade', 'milkTime'); invariant(s);
+  go('buyItem', 'chocolateBar'); go('shipUpgrade', 'milkTime');
+  assert.ok(E.restore(JSON.stringify(s)));
 });
 
 test('time keeps running in other scenes and offline time is capped', () => {

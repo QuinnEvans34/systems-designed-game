@@ -56,6 +56,11 @@
           <div id="steam" class="steam"></div>
         </div>
         <button id="milk-button" class="milk-button sprite sprite-milk" data-action="milk" aria-label="Milk the cow on the pad"></button>
+        <div class="maintenance-panel" id="maintenance-panel">
+          <div class="podium-screen"><span class="podium-heading">MOO-MATIC HEALTH</span><b id="milker-health">100%</b><small id="milker-status">Running smoothly</small><span class="podium-meter"><i id="milker-meter"></i></span></div>
+          <button class="repair-button" id="repair-button" data-action="repair" title="Call the Hard Hat Cat (R)"><span class="hardhat" aria-hidden="true">⛑</span><span id="repair-label">Call Hard Hat Cat · 15</span></button>
+          <div class="repair-cat" id="repair-cat" hidden><span class="alien-portrait" aria-hidden="true"></span><span class="hardhat cat-hat" aria-hidden="true">⛑</span><small id="repair-timer">Fixing… 20s</small></div>
+        </div>
         <div id="pod" class="pod" data-drop="pod">
           <button class="pod-body" data-action="pod" aria-label="Return chute: send the cow on the pad home"><span class="chute-passenger" id="chute-passenger" aria-hidden="true"></span></button>
         </div>
@@ -80,6 +85,9 @@
       <span class="coin-token" aria-hidden="true"></span><strong id="coins">0</strong><small>coins</small>
       <span class="pocket-divider"></span>
       <span class="bottle-token" aria-hidden="true"></span><strong id="bottles">0/5</strong><small>milk</small>
+    </div>
+    <div class="pocket visit-hud" id="visit-hud" aria-label="Visits and goal" title="A visit is one trip Field → Ship → Market" hidden>
+      <small>VISIT</small><strong id="visits">1</strong><span class="pocket-divider"></span><small id="visits-label">goal <span id="goal-text">5,000</span> coins</small>
     </div>
 
     <nav id="travel" class="travel-signpost" aria-label="Travel between scenes" hidden>

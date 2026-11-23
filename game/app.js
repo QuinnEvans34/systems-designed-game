@@ -215,6 +215,23 @@
     $('pad-status').textContent = m ? `Milking · ${Math.max(0, Math.ceil(m.until - s.time))}s` : !pad ? 'Select a cow below' : /full/.test(why || '') ? 'Milk storage full' : cowStatus(pad);
     $('podium-fill').style.width = m ? $('milker-fill').style.width : '0%';
     $('store-cow').disabled = $('return-cow').disabled = !pad || Boolean(m);
+    renderMaintenance();
+  }
+  function renderMaintenance() {
+    const s = state, mk = s.milker, fixing = G.repairing(s);
+    const panel = $('maintenance-panel');
+    panel.classList.toggle('worn', G.worn(s) && !mk.broken);
+    panel.classList.toggle('broken', mk.broken && !fixing);
+    $('milker-health').textContent = mk.broken && !fixing ? 'BROKEN' : `${Math.round(mk.condition)}%`;
+    $('milker-meter').style.width = (mk.broken && !fixing ? 100 : mk.condition) + '%';
+    $('milker-status').textContent = fixing ? 'Hard Hat Cat at work' : mk.broken ? 'Call the Hard Hat Cat!'
+      : G.worn(s) ? `Worn: milking takes ${G.MILKER.slow_multiplier}× longer` : `${Math.round(G.breakChance(s) * 100)}% breakdown risk`;
+    const why = G.reason(s, 'repair');
+    $('repair-button').disabled = Boolean(why);
+    $('repair-button').title = why || `Call the Hard Hat Cat: ${G.MILKER.repair_cost} coins, ${G.MILKER.repair_seconds}s (R)`;
+    $('repair-label').textContent = fixing ? 'Repair underway' : `Call Hard Hat Cat · ${G.MILKER.repair_cost}`;
+    $('repair-cat').hidden = !fixing;
+    $('repair-timer').textContent = `Fixing… ${G.repairLeft(s)}s`;
   }
   function shipFrame(now) {
     if (!state.milking || now - lastPuff < 420) return;
@@ -327,11 +344,14 @@
     $('location-title').textContent = LOCATIONS[s.scene][0];
     $('location-subtitle').textContent = LOCATIONS[s.scene][1];
     for (const scene of G.SCENES) $(scene + '-scene').hidden = scene !== s.scene;
-    for (const id of ['travel', 'supplies-hud', 'hud-right', 'save-mark']) $(id).hidden = !s.started;
+    for (const id of ['travel', 'supplies-hud', 'visit-hud', 'hud-right', 'save-mark']) $(id).hidden = !s.started;
     $('suspicion').hidden = !s.started || s.scene !== 'farm';
     $('welcome').hidden = s.started;
     $('coins').textContent = compact(s.coins);
     $('bottles').textContent = `${G.bottleCount(s)}/${G.bottleCap(s)}`;
+    $('visits').textContent = s.visits;
+    $('visits-label').firstChild.textContent = s.won ? `★ won in ${s.wonVisits} · goal ` : 'goal ';
+    $('goal-text').textContent = G.GOAL.toLocaleString();
     $('susp-mask').style.width = (1 - s.suspicion / G.SUSPICION_LIMIT) * 86.44 + '%';
     const blocked = s.suspicion + G.beamSuspicion(s) > G.SUSPICION_LIMIT;
     $('susp-text').textContent = `Ship ${s.ship.length}/${G.cowCap(s)} cows · ${blocked ? 'lay low, Earth is watching!' : s.ship.length >= G.cowCap(s) ? 'ship full' : 'beam ready'}`;
@@ -347,6 +367,7 @@
     for (const notice of s.notices) {
       if (notice.id <= lastNotice) continue;
       lastNotice = notice.id; toast(notice.text); fresh = true;
+      if (notice.kind === 'win') setTimeout(winScreen, 600);
       if (notice.kind === 'bottle' && s.scene === 'ship') fly(bottle(notice.type), $('pad-cow'), $('bottles'), 1100);
     }
     if (fresh) save(); // a finished milking is worth saving right away
@@ -434,7 +455,9 @@
       <section class="menu-row"><h3>2. Milk it aboard the ship</h3><p>The first cow aboard steps onto an empty milking pad when you enter the ship. Click another cow to swap it in, then press MILK. The milker covers the cow for ${G.milkTime(state)}s and makes one bottle of its milk. Inventory holds ${G.bottleCap(state)} bottles.</p></section>
       <section class="menu-row"><h3>3. Upgrade it, then send it home</h3><p>Use the cow storage monitor to drag treats onto cows. A milked or upgraded cow is exhausted. Send it home through the return chute and watch its pod fly away outside. It rests in the field for ${G.REST}s before it can be beamed again.</p></section>
       <section class="menu-row"><h3>4. Sell, buy, grow</h3><p>At the market, the left stand buys milk, the middle stand upgrades your ship, and the right stand sells new cows and treats. Your herd can hold up to ${G.HERD_MAX} cows.</p></section>
-      <section class="menu-row"><h3>Keys</h3><p>1 / 2 / 3 travel · I inventory · M milk · ← → Space in the field · Esc closes windows</p></section>
+      <section class="menu-row"><h3>5. Keep the milker running</h3><p>Every milking wears the Moo-Matic down ${G.MILKER.wear_per_milking}%. Under ${G.MILKER.slow_below}% it milks ${G.MILKER.slow_multiplier}× slower, and it can break at random, more often as it wears. Call the Hard Hat Cat (R) for ${G.MILKER.repair_cost} coins: the repair takes ${G.MILKER.repair_seconds}s.</p></section>
+      <section class="menu-row"><h3>How to win</h3><p>Reach ${G.GOAL.toLocaleString()} coins. A visit is one trip Field → Ship → Market; the counter shows how many it took. This is visit ${state.visits}.</p></section>
+      <section class="menu-row"><h3>Keys</h3><p>1 / 2 / 3 travel · I inventory · M milk · R repair the milker · ← → Space in the field · Esc closes windows</p></section>
       <section class="menu-row"><h3>About your dairy</h3><p>${Math.floor(state.totalTime / 60)} minutes played · ${compact(state.earned)} coins earned from milk<br>${storageOK ? 'Progress saves automatically in this browser.' : 'This browser blocked saving. Keep the tab open, or download a backup.'}</p></section>
       <div class="menu-actions"><button class="ui-button" data-action="export">Save a backup</button><button class="ui-button" data-action="import">Restore backup</button></div>
       <button class="ui-button wide" data-action="fullscreen">Toggle fullscreen</button><input id="import-file" type="file" accept=".json,application/json" hidden>
@@ -442,6 +465,13 @@
   }
 
   /* ---------- actions ---------- */
+  function winScreen() {
+    const s = state, min = Math.floor(s.wonTime / 60), sec = String(s.wonTime % 60).padStart(2, '0');
+    openDialog('win', 'GALACTIC DAIRY CHAMPION', `<h2 id="dialog-title">You reached ${G.GOAL.toLocaleString()} coins!</h2>
+      <p>Your milk empire is complete. Can you get there faster next time?</p>
+      <section class="menu-row"><h3>Your result</h3><p><b>${s.wonVisits} visit${s.wonVisits === 1 ? '' : 's'}</b> · ${min}:${sec} played · ${compact(s.earned)} coins earned from milk</p></section>
+      <div class="menu-actions"><button class="ui-button gold" data-action="close-dialog">Keep playing</button><button class="ui-button" data-action="new-game">New Game</button></div>`);
+  }
   function resumeMenu() {
     openDialog('resume', 'WELCOME BACK, SPACE FARMER', `<h2 id="dialog-title">Ready to milk the galaxy?</h2>
       <p>Continue where you left off, or start a new game from the beginning.</p>
@@ -462,6 +492,7 @@
       closeDialog();
     }
     if (action === 'send' && state.scene === 'ship') launchPod(result.detail);
+    if (action === 'milk' && result.detail && result.detail.broke) { render(); toast(result.message); save(); return result; }
     if (action === 'sell' || action === 'sellAll') { float(`+${result.detail.coins} coins`, target); drinkQueue.push(...result.detail.sold.slice(-12)); drinkQueue.splice(0, Math.max(0, drinkQueue.length - 16)); }
     if (action === 'buyCow') float('+1 cow', target);
     if (action === 'buyItem' || action === 'shipUpgrade') float('✓', target);
@@ -616,6 +647,7 @@
     if (['1', '2', '3'].includes(k)) { event.preventDefault(); perform('travel', G.SCENES[Number(k) - 1]); return; }
     if (k.toLowerCase() === 'i') { event.preventDefault(); inventory(); return; }
     if (state.scene === 'ship' && k.toLowerCase() === 'm') { event.preventDefault(); perform('milk', undefined, undefined, $('milk-button')); return; }
+    if (state.scene === 'ship' && k.toLowerCase() === 'r') { event.preventDefault(); perform('repair', undefined, undefined, $('repair-button')); return; }
     if (state.scene !== 'farm') return;
     if (k === 'ArrowLeft' || k === 'a') { event.preventDefault(); ufo.keys.add('left'); }
     else if (k === 'ArrowRight' || k === 'd') { event.preventDefault(); ufo.keys.add('right'); }

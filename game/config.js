@@ -146,6 +146,18 @@ window.MOO_CONFIG = {
     "limit": 100,
     "cooldown_per_second": 1.5
   },
+  "goal": {
+    "coins": 5000
+  },
+  "milker": {
+    "wear_per_milking": 10,
+    "slow_below": 50,
+    "slow_multiplier": 2,
+    "break_chance": 0.05,
+    "worn_break_chance": 0.2,
+    "repair_cost": 15,
+    "repair_seconds": 20
+  },
   "time": {
     "offline_hours": 4
   }

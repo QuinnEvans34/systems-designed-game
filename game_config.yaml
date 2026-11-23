@@ -178,6 +178,25 @@ suspicion:
   cooldown_per_second: 1.5 # how fast suspicion drops
 
 # ---------------------------------------------------------------------
+#  Winning (play-test change, Nov 23: the win is money, not a visit count)
+# ---------------------------------------------------------------------
+goal:
+  coins: 5000              # reach this many coins to win. The game counts your visits.
+
+# ---------------------------------------------------------------------
+#  Milker maintenance (play-test change: the balancing loop on milking)
+#  Condition runs from 100 (new) to 0 (worn out).
+# ---------------------------------------------------------------------
+milker:
+  wear_per_milking: 10     # condition lost each milking
+  slow_below: 50           # under this condition, milking is slower...
+  slow_multiplier: 2       # ...by this much (2 = takes twice as long)
+  break_chance: 0.05       # chance to break when you press MILK (0.05 = 5%)
+  worn_break_chance: 0.2   # chance under slow_below. At 0 condition it always breaks.
+  repair_cost: 15          # coins to call the Hard Hat Cat
+  repair_seconds: 20       # how long the repair takes. Restores condition to 100.
+
+# ---------------------------------------------------------------------
 #  Time
 # ---------------------------------------------------------------------
 time:

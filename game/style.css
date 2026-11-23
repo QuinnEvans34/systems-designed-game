@@ -488,6 +488,9 @@ body.drag-item .cow-card:not(.empty) { border-style: dashed; }
 .pocket { gap: 10px; padding: 10px 14px; }
 .pocket strong { font-size: clamp(24px, 2vw, 32px); }
 .pocket small { display: inline; font-size: 16px; }
+.visit-hud { top: calc(2.5% + 74px); }
+.visit-hud strong { font-size: 22px; }
+.visit-hud small { font-size: 13px; }
 .pocket-divider { width: var(--ui-pixel); height: 28px; background: #706b86; }
 .coin-token, .bottle-token { image-rendering: pixelated; }
 .travel-signpost { padding: 3px; gap: 4px; }
@@ -680,6 +683,30 @@ body.drag-item .cow-card:not(.empty) { border-style: dashed; }
 .podium-controls button { width: 1.6cqw; height: 1.3cqw; padding: 0; border: .12cqw solid #88b7b0; background: #314f52; color: #ceffe6; font-size: 1cqw; line-height: 1; }
 .podium-controls button:disabled { opacity: .3; }
 .podium-controls button:hover:not(:disabled) { background: #49746d; }
+/* Visit counter and coin goal (play-test change) */
+.visit-hud { position: absolute; left: 2%; top: calc(2.5% + 58px); z-index: 7; padding: 4px 12px; gap: 7px; }
+.visit-hud strong { font-size: 18px; }
+.visit-hud small { display: inline; font-size: 11px; letter-spacing: .04em; }
+
+/* Milker maintenance (play-test change): health readout, repair button, Hard Hat Cat */
+.maintenance-panel { position: absolute; left: 25%; top: 64.5%; width: 12cqw; height: 10.5cqw; z-index: 6; filter: drop-shadow(.35cqw .45cqw 0 #241e3544); }
+.maintenance-panel .podium-screen { inset: 0 0 42%; }
+.maintenance-panel .podium-meter { right: .55cqw; }
+.maintenance-panel.worn .podium-meter i { background: #ffd36b; }
+.maintenance-panel.broken .podium-meter i, .maintenance-panel.broken #milker-health { background: none; color: #ff8a8a; }
+.maintenance-panel.broken .podium-meter i { background: #ff6b6b; }
+.repair-button { position: absolute; left: 4%; right: 4%; bottom: 8%; height: 2.6cqw; display: flex; align-items: center; justify-content: center; gap: .4cqw; padding: 0 .4cqw; border: .2cqw solid #211c2c; border-radius: .5cqw; background: #ffc65a; color: #2a1c06; font: inherit; font-size: .72cqw; cursor: pointer; box-shadow: 0 .3cqw 0 #9a6a12; }
+.repair-button:hover:not(:disabled) { filter: brightness(1.1); }
+.repair-button:disabled { background: #8a8197; color: #2c2838; box-shadow: 0 .3cqw 0 #4d4659; cursor: not-allowed; }
+.broken .repair-button:not(:disabled) { animation: repair-pulse 1s ease-in-out infinite; }
+@keyframes repair-pulse { 50% { filter: brightness(1.25); transform: translateY(-.15cqw); } }
+.hardhat { font-size: 1.1cqw; line-height: 1; }
+.repair-cat { position: absolute; right: 100%; bottom: 12%; margin-right: .6cqw; display: flex; flex-direction: column; align-items: center; gap: .2cqw; }
+.repair-cat .alien-portrait { width: 4.4cqw; height: 4.4cqw; animation: repair-bob .5s ease-in-out infinite alternate; }
+.repair-cat .cat-hat { position: absolute; top: -.9cqw; font-size: 2.2cqw; animation: repair-bob .5s ease-in-out infinite alternate; }
+.repair-cat small { padding: .15cqw .5cqw; background: #2c2b38ee; border-radius: .4cqw; color: #ffc65a; font-size: .7cqw; white-space: nowrap; }
+@keyframes repair-bob { to { transform: translateY(-.35cqw) rotate(-4deg); } }
+@media (prefers-reduced-motion: reduce) { .repair-cat .alien-portrait, .repair-cat .cat-hat, .broken .repair-button { animation: none; } }
 .storage-console {
   position: absolute; left: 25%; right: 25%; bottom: .4%; height: 11.2%; z-index: 6;
   background: #51475f; border: .3cqw solid #251e33;
@@ -741,3 +768,7 @@ body.drag-item .cow-card:not(.empty) { border-style: dashed; }
   .pocket strong { font-size: clamp(16px, 2.6vw, 22px); }
   .pocket small { display: none; }
 }
+
+/* The visit badge keeps its short labels at every size, so "VISIT 3" never shows as a bare number. */
+.pocket.visit-hud small { display: inline; }
+@media (max-width: 640px) { .pocket.visit-hud #visits-label, .pocket.visit-hud .pocket-divider { display: none; } }

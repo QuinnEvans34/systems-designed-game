@@ -160,9 +160,9 @@ All costs and effects are placeholders. Level 3 is the cap for now, and more lev
 
 ## Playable test changes (team-owned)
 
-After play-testing Ted's first build, the team decided on two changes. The team will code both over the weekend of Nov 21–22. All numbers are placeholders to tune.
+After play-testing Ted's first build, the team decided on two changes. Both are now in the game (Nov 23). All numbers are placeholders to tune in game_config.yaml.
 
-**1. The game ends after 10 rounds.** One round is a full trip: Field → Ship → Market. A round ends when the player leaves the Market. After round 10, the game ends and shows the final coin total as the score. This gives the game a clear finish and a number to beat on the leaderboard.
+**1. You win by reaching 5,000 coins.** A visit is one full trip: Field → Ship → Market, and a counter shows how many visits you've made. We first planned to end the game after 10 rounds, but in the Nov 23 play-test the visits stacked up quickly without changing how anyone played, so money became the goal and there is no visit limit. The win screen shows how many visits it took, which gives players a number to beat.
 
 **2. Milker maintenance and random breakdowns.** The milking machine wears out, and the Hard Hat Cat repairs it.
 

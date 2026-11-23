@@ -20,6 +20,23 @@ These rules implement the game design document (high-level game flow, game items
 - Each trip aboard, a cow can be milked once and upgraded once. Upgrading first gives the better milk on the same trip.
 - A cow can't be moved, sent home or upgraded while the milker is working on it.
 
+## Winning and visits (play-test change, Nov 23)
+
+- **You win by reaching 5,000 coins** (`goal.coins`). A win screen shows how many visits it took and how long you played. You can keep playing or start a new game.
+- A **visit** is one trip Field → Ship → Market. Leaving the Market for the Field starts the next visit. The counter sits under your coins.
+- There is **no visit limit**. In the Nov 23 play-test, visits stacked up quickly without changing how anyone played, so money became the goal instead of a visit count.
+
+## Milker maintenance (play-test change, Nov 23)
+
+The Moo-Matic milker wears out, which adds a balancing loop to milking and the game's randomness.
+
+- The milker starts at **100%** condition. Each finished milking takes **10%** (`milker.wear_per_milking`).
+- Under **50%** (`slow_below`), milking takes **2×** as long (`slow_multiplier`).
+- Each time you press MILK, the milker may **break**: **5%** chance at 50% or above (`break_chance`), **20%** under 50% (`worn_break_chance`), always at 0%. A breakdown doesn't milk the cow.
+- A broken milker can't milk until it's repaired. Press **Call Hard Hat Cat** on the ship (or **R**): it costs **15 coins** (`repair_cost`), takes **20 seconds** (`repair_seconds`), and restores the milker to 100%.
+- You can also repair early, before it breaks, as long as it's below 100%.
+- Breakdowns use the save's own random numbers, so a restored backup plays out the same way.
+
 ## Cows and milk
 
 | Cow | Milk | Sells for |
