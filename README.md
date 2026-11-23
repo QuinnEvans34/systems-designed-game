@@ -20,6 +20,8 @@ Visit **http://localhost:4173**. On Windows PowerShell, use `npm.cmd start` if e
 
 Choose **Play** to start freely, or **Play with tutorial** for Miso's short introduction. The tutorial follows just your first cow through beaming, milking and selling one bottle. After the sale, click any highlighted market stand for a brief overview of all three stands and how ship and cow upgrades work. No purchase is required; dismiss the explanation and play freely. You can skip the tutorial at any time, and its progress saves with your dairy.
 
+When you reopen or refresh a saved game, choose **Continue** to pick up where you left off, or **New Game** to start from the beginning. New Game asks for confirmation before replacing your progress, then offers the usual Play and tutorial choices. Your save stays untouched while you decide.
+
 1. **Field.** Move the UFO with the mouse or **← →**. When a cow glows under it, **click or press Space** to beam it up. Each beam raises Earth's suspicion.
 2. **Ship.** The first cow aboard teleports onto an empty milking pad when you enter the ship. Click a cow hologram on the bottom control panel, or drag it onto the pad, to teleport another cow in. The podium beside the pad displays its name, status and milking progress. Press **MILK** on the overhead milker (or **M**). One cow gives one bottle of its milk.
 3. **Upgrade.** Click the **cow storage monitor** and drag a treat onto a cow: base → chocolate → strawberry → doughnut → almond → eggnog → skeleton. Festive spice turns an almond cow into a Christmas-themed eggnog cow; a bone biscuit turns an eggnog cow into a skeleton cow that gives skim milk.

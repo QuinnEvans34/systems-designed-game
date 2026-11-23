@@ -23,10 +23,13 @@
 
   let state, storageOK = true, toastTimer, dialog = '', dialogSig = '', lastNotice = 0, lastSave = Date.now(), lastTick = Date.now();
   let pendingReset = false, pendingImport = null, selectedItem = null, suppressClick = false, guideHidden = false;
+  let awaitingStartChoice = false;
   try { guideHidden = localStorage.getItem('moo-guide-hidden') === '1'; } catch { /* storage blocked */ }
 
   /* ---------- saving, toasts, floating numbers ---------- */
   function save() {
+    // Keep the existing save untouched until the player chooses how to start.
+    if (awaitingStartChoice) return;
     const now = Date.now();
     G.advance(state, Math.max(0, (now - lastTick) / 1000));
     lastTick = now; state.savedAt = now;
@@ -439,6 +442,13 @@
   }
 
   /* ---------- actions ---------- */
+  function resumeMenu() {
+    openDialog('resume', 'WELCOME BACK, SPACE FARMER', `<h2 id="dialog-title">Ready to milk the galaxy?</h2>
+      <p>Continue where you left off, or start a new game from the beginning.</p>
+      <section class="menu-row"><h3>Your saved dairy</h3><p>${esc(LOCATIONS[state.scene][0])} · ${compact(state.coins)} coins · ${state.field.length + state.ship.length} cows · ${G.bottleCount(state)} bottles</p></section>
+      <div class="menu-actions"><button class="ui-button gold" data-action="continue">Continue</button><button class="ui-button" data-action="new-game">New Game</button></div>
+      <p>Starting a new game replaces your saved progress after confirmation.</p>`);
+  }
   const QUIET = ['travel', 'pad', 'unpad', 'milk', 'start'];
   function perform(action, value, extra, target) {
     const result = G.act(state, action, value, extra);
@@ -470,6 +480,15 @@
     const action = el.dataset.action, value = el.dataset.value, extra = el.dataset.extra;
     const id = Number(value);
     switch (action) {
+      case 'resume-menu': return resumeMenu();
+      case 'continue': {
+        if (!awaitingStartChoice) return;
+        const away = G.offline(state);
+        awaitingStartChoice = false; lastTick = Date.now(); lastNotice = state.noticeId;
+        closeDialog(); render(); save();
+        if (away.seconds >= 30) toast(`Welcome back! ${Math.floor(away.seconds / 60)} min passed. Your cows had a lovely rest.`);
+        return;
+      }
       case 'menu': return menu();
       case 'close-dialog': return closeDialog();
       case 'inventory': return inventory();
@@ -506,12 +525,13 @@
         const a = document.createElement('a'); a.href = url; a.download = 'moo-ving-dairy-save.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
         return toast('Your dairy backup is downloaded.');
       }
-      case 'reset':
+      case 'new-game': case 'reset':
         pendingReset = true;
-        return openDialog('reset', 'ONE LAST CHECK', '<h2 id="dialog-title">A completely fresh start?</h2><p>This clears your dairy on this device. You can save a backup from the field guide first.</p><div class="menu-actions"><button class="ui-button" data-action="menu">Keep my dairy</button><button class="ui-button danger" data-action="confirm-reset">Start over</button></div>');
+        return openDialog('reset', 'ONE LAST CHECK', `<h2 id="dialog-title">A completely fresh start?</h2><p>This replaces your saved dairy on this device. Your cows, coins, milk, upgrades and tutorial progress will reset.</p><div class="menu-actions"><button class="ui-button" data-action="${awaitingStartChoice ? 'resume-menu' : 'menu'}">Keep my dairy</button><button class="ui-button danger" data-action="confirm-reset">Start over</button></div>`);
       case 'confirm-reset':
         if (!pendingReset) return;
-        state = G.createGame(); resetVisuals(); lastNotice = 0; closeDialog(); save(); return render();
+        awaitingStartChoice = false; state = G.createGame(); lastTick = Date.now();
+        resetVisuals(); lastNotice = 0; closeDialog(); save(); return render();
       default: return perform(action, value, undefined, el); // travel, start, milk, unpad, sellAll, buyCow, buyItem, shipUpgrade
     }
   }
@@ -618,8 +638,12 @@
       openDialog('import', 'RESTORE YOUR DAIRY', `<h2 id="dialog-title">Pick up where you left off?</h2><p>This backup has ${compact(restored.coins)} coins and ${restored.field.length + restored.ship.length} cows. Restoring it replaces the current dairy on this device.</p><div class="menu-actions"><button class="ui-button" data-action="close-dialog">Keep this dairy</button><button class="ui-button" data-action="confirm-import">Restore backup</button></div>`);
     } catch { toast('This backup could not be read. Try another save file.'); }
   });
+  $('world-dialog').addEventListener('cancel', event => {
+    if (dialog === 'resume') event.preventDefault();
+  });
   $('world-dialog').addEventListener('close', () => {
     dialog = ''; pendingReset = false; pendingImport = null; selectedItem = null; endDrag();
+    if (awaitingStartChoice) { resumeMenu(); return; }
     if (state.tutorial === 'overview') { state.tutorial = 'done'; save(); }
     renderTutorial();
   });
@@ -627,16 +651,16 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
 
   /* ---------- boot ---------- */
-  let away;
   try { state = G.restore(localStorage.getItem(KEY)); } catch { storageOK = false; }
-  if (state) { lastNotice = state.noticeId; away = G.offline(state); lastNotice = state.noticeId; }
+  if (state) { lastNotice = state.noticeId; awaitingStartChoice = state.started; }
   else state = G.createGame();
   if (state.tutorial === 'overview') state.tutorial = 'markets';
   makeCats(); render(); save();
+  if (awaitingStartChoice) resumeMenu();
   if (window.MOO_CONFIG_ERROR) {
     console.error(window.MOO_CONFIG_ERROR);
     setTimeout(() => toast('⚠ game_config.yaml has a mistake, so the game is using the last good settings. ' + window.MOO_CONFIG_ERROR.split('\n').slice(1, 3).join(' ').replace(/•/g, '').trim()), 300);
-  } else if (away && away.seconds >= 30 && state.started) toast(`Welcome back! ${Math.floor(away.seconds / 60)} min passed. Your cows had a lovely rest.`);
+  }
   let lastFrame = performance.now();
   function frame(now) {
     const dt = Math.min(.1, (now - lastFrame) / 1000); lastFrame = now;
@@ -648,6 +672,7 @@
   }
   requestAnimationFrame(frame);
   setInterval(() => {
+    if (awaitingStartChoice) return;
     const now = Date.now(), elapsed = Math.max(0, (now - lastTick) / 1000); lastTick = now;
     G.advance(state, elapsed); render();
     if (now - lastSave >= 5000) save();

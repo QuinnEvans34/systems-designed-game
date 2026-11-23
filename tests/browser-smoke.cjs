@@ -34,6 +34,7 @@ const designDoc = loadConfig(path.join(__dirname, 'fixtures/design-doc-config.ya
         sessionStorage.setItem('smoke-next-save', JSON.stringify(s));
       }, [KEY, `(${build})(s, G)`]);
       await page.reload();
+      if (await page.locator('[data-action="continue"]').isVisible()) await page.locator('[data-action="continue"]').click();
     };
     const center = async selector => { const b = await page.locator(selector).first().boundingBox(); return [b.x + b.width / 2, b.y + b.height / 2]; };
     async function dragTo(from, to) {
@@ -57,6 +58,28 @@ const designDoc = loadConfig(path.join(__dirname, 'fixtures/design-doc-config.ya
     assert.match(await page.locator('#guide-text').textContent(), /first cow/);
     await page.reload();
     assert.equal((await saved()).tutorial, 'first-sale', 'tutorial choice survives a reload');
+    assert.equal(await page.locator('#world-dialog[data-kind="resume"]').isVisible(), true);
+    const untouched = await page.evaluate(key => localStorage.getItem(key), KEY);
+    await page.waitForTimeout(5200);
+    await page.evaluate(() => document.activeElement.blur());
+    await page.keyboard.press('3');
+    await page.keyboard.press('Space');
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#world-dialog[data-kind="resume"]').isVisible(), true, 'Escape cannot bypass the startup choice');
+    assert.equal(await page.evaluate(key => localStorage.getItem(key), KEY), untouched, 'autosave and gameplay leave the saved game untouched while deciding');
+    await page.reload();
+    assert.equal(await page.evaluate(key => localStorage.getItem(key), KEY), untouched, 'reloading the choice screen preserves the save');
+    await shot('restart-choice-desktop');
+    for (const size of [{ width: 320, height: 844 }, { width: 390, height: 844 }, { width: 844, height: 390 }]) {
+      await page.setViewportSize(size);
+      const inside = await page.locator('#dialog-content [data-action]').evaluateAll(els => els.every(el => {
+        const r = el.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight;
+      }));
+      assert.equal(inside, true, `restart choices fit ${size.width}x${size.height}`);
+      if (size.width === 390) await shot('restart-choice-mobile');
+    }
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.locator('[data-action="continue"]').click();
     assert.equal(await page.locator('#guide').isVisible(), true);
     await shot('tutorial-miso-desktop');
 
@@ -131,6 +154,7 @@ const designDoc = loadConfig(path.join(__dirname, 'fixtures/design-doc-config.ya
     assert.equal(await page.locator('#world-dialog').evaluate(el => el.open), false, 'the first sale reveals the market stands');
     assert.equal(await page.locator('.stand.tutorial-target').count(), 3);
     await page.reload();
+    await page.locator('[data-action="continue"]').click();
     assert.equal(await page.locator('.stand.tutorial-target').count(), 3, 'the market prompt survives a reload');
     await page.locator('.stand-ship').click();
     assert.equal(await page.locator('.market-tutorial').isVisible(), true);
@@ -162,6 +186,7 @@ const designDoc = loadConfig(path.join(__dirname, 'fixtures/design-doc-config.ya
     assert.match(await page.locator('#dialog-title').textContent(), /Inventory/);
     await page.keyboard.press('Escape');
     await page.reload();
+    await page.locator('[data-action="continue"]').click();
     assert.equal(await page.locator('#welcome').isVisible(), false);
     assert.equal(await page.locator('#guide').isVisible(), false, 'the tutorial stays finished');
     assert.equal((await saved()).ship[0].type, 'chocolate');
@@ -194,6 +219,18 @@ const designDoc = loadConfig(path.join(__dirname, 'fixtures/design-doc-config.ya
     await page.locator('[data-action="reset"]').click();
     await page.getByRole('button', { name: 'Keep my dairy', exact: true }).click();
     assert.equal((await saved()).coins, 123);
+    await page.keyboard.press('Escape');
+    await page.reload();
+    await page.locator('[data-action="new-game"]').click();
+    await page.keyboard.press('Escape');
+    await page.locator('#world-dialog[data-kind="resume"]').waitFor();
+    assert.equal((await saved()).coins, 123, 'dismissing New Game preserves the dairy');
+    await page.locator('[data-action="new-game"]').click();
+    await page.getByRole('button', { name: 'Keep my dairy', exact: true }).click();
+    assert.equal(await page.locator('#world-dialog[data-kind="resume"]').isVisible(), true);
+    await page.locator('[data-action="continue"]').click();
+    assert.equal((await saved()).coins, 123, 'Continue retains the original dairy after canceling New Game');
+    await page.locator('[data-action="menu"]').click();
     await page.locator('[data-action="reset"]').click();
     await page.locator('[data-action="confirm-reset"]').click();
     assert.equal((await saved()).coins, 0); assert.equal(await page.locator('#welcome').isVisible(), true);
@@ -211,8 +248,25 @@ const designDoc = loadConfig(path.join(__dirname, 'fixtures/design-doc-config.ya
     await shot('tutorial-miso-mobile');
     await page.locator('#guide [data-action="finish-tutorial"]').click();
     await page.reload();
+    await page.locator('[data-action="continue"]').click();
     assert.equal(await page.locator('#guide').isVisible(), false);
     assert.equal((await saved()).tutorial, 'done');
+
+    await page.reload();
+    await page.locator('[data-action="new-game"]').click();
+    await page.locator('[data-action="confirm-reset"]').click();
+    s = await saved();
+    assert.equal(s.started, false);
+    assert.equal(s.tutorial, 'off');
+    assert.equal(s.scene, 'farm');
+    assert.equal(s.time, 0);
+    assert.equal(s.ship.length, 0);
+    assert.equal(s.coins, designDoc.start.coins);
+    assert.equal(s.field.length, designDoc.start.cows);
+    assert.ok(Object.values(s.levels).every(level => level === 0));
+    assert.equal(await page.locator('#welcome').isVisible(), true, 'confirmed New Game returns to the beginning');
+    await page.reload();
+    assert.equal(await page.locator('#welcome').isVisible(), true, 'a fresh game offers Play and tutorial without a Continue prompt');
 
     // The entire game still runs by opening index.html, with no server or network.
     const offline = await context.newPage();
@@ -223,6 +277,6 @@ const designDoc = loadConfig(path.join(__dirname, 'fixtures/design-doc-config.ya
     await offline.close();
     assert.deepEqual(errors, [], 'No browser runtime errors');
     assert.deepEqual(missing, [], 'No missing assets or scripts');
-    console.log('Browser smoke passed: optional tutorial, saved tutorial progress, first-cow sale, market and upgrade overview without purchases, tutorial skipping, UI priority, abduction, automatic pad, milking, return chute, market trading, item drag, inventory, autosave, narrow layouts, backup restore, reset, and file:// play.');
+    console.log('Browser smoke passed: restart choices, unchanged save while deciding, Continue, canceled and confirmed New Game, narrow restart layouts, optional tutorial, saved tutorial progress, first-cow sale, market overview, tutorial skipping, abduction, milking, trading, inventory, autosave, backup restore, reset, and file:// play.');
   } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });

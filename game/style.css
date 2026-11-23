@@ -605,6 +605,8 @@ body.drag-item .cow-card:not(.empty) { border-style: dashed; }
 }
 
 /* Optional first-sale tutorial: keep Miso and the next control easy to find. */
+.world-dialog[data-kind="resume"] .close-dialog { display: none; }
+.world-dialog[data-kind="resume"] .menu-actions + p { margin-top: 16px; }
 .welcome-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .welcome-actions .start-button { gap: 16px; }
 .guide { max-width: 500px; gap: 12px; }

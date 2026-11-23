@@ -43,7 +43,7 @@ test('mistakes are reported with the line or setting that caused them', () => {
   assert.throws(() => parseYaml('start:\n  coins: 1\n   cows: 2'), /line 3: .*line up/);
   assert.throws(() => parseYaml('start:\n  coins 1'), /line 2: expected "name: value"/);
   assert.throws(() => parseYaml('a: 1\na: 2'), /appears twice/);
-  const yaml = fs.readFileSync(fixture, 'utf8');
+  const yaml = fs.readFileSync(fixture, 'utf8').replace(/\r\n/g, '\n');
   problem(yaml.replace('milk_price: 5 ', 'milk_prise: 5 '), /cows\.base\.milk_prise: unknown setting/);
   problem(yaml.replace('turns: base', 'turns: banana'), /"banana" isn't one of the cows/);
   problem(yaml.replace('milk_price: 15', 'milk_price: lots'), /cows\.chocolate\.milk_price: should be a number/);

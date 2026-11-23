@@ -25,6 +25,7 @@ const G=require('../game/engine.js');
       Math.random=()=>values.length?values.shift():.5;
     },fixture);
     await page.goto(process.env.GAME_URL||'http://localhost:4173');
+    await page.locator('[data-action="continue"]').click();
     await page.waitForLoadState('networkidle');await page.evaluate(()=>document.fonts.ready);
     assert.ok(await page.locator('.field-cow').first().evaluate(el=>getComputedStyle(el).transitionProperty.includes('transform')),'depth scale animates alongside movement');
     await page.addStyleTag({content:'.world > :not(#stage), #ufo {visibility:hidden!important} * {animation:none!important;transition:none!important}'});

@@ -25,6 +25,7 @@ const path = require('node:path');
       sessionStorage.setItem('scene-fixture', JSON.stringify(s));
     });
     await page.reload();
+    await page.locator('[data-action="continue"]').click();
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(1000);
     const saved = () => page.evaluate(() => JSON.parse(localStorage.getItem('moo-ving-v3')));
