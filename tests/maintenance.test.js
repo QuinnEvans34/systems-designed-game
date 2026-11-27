@@ -68,8 +68,8 @@ test('preventive repairs are allowed, but not on a perfect milker or without coi
   const G = rules(SAFE); const { s, ok, no } = setup(G);
   ok('travel', 'ship');
   assert.match(no('repair').message, /top shape/);
-  s.milker.condition = 70; s.coins = 0; assert.match(no('repair').message, /charges/);
-  s.coins = 15; ok('repair'); assert.equal(s.coins, 0);
+  s.milker.condition = 70; s.coins = 15; ok('repair'); assert.equal(s.coins, 0);
+  assert.equal(s.milker.repairUntil, s.time + G.MILKER.repair_seconds);
 });
 
 test('breakdowns follow the seeded random numbers, so a save replays the same way', () => {
@@ -92,4 +92,43 @@ test('saves from before these changes load with a counter and a fresh milker', (
   for (const bad of [{ visits: 0 }, { visits: 1.5 }, { milker: { condition: 120, broken: false, repairUntil: 0 } }, { milker: { condition: 50, broken: 'yes', repairUntil: 0 } }, { won: 'no' }]) {
     assert.equal(G.restore(JSON.stringify({ ...s, ...bad })), null, JSON.stringify(bad));
   }
+});
+
+test('a beam past the suspicion limit gets you caught: cows run home, milk spills, you flee', () => {
+  const G = rules(SAFE); const { s, ok } = setup(G);
+  assert.equal(G.CAUGHT, true);
+  ok('travel', 'farm'); s.levels.cowCap = 5; s.bottles.base = 3;
+  for (let i = 0; i < 4; i++) ok('beam', s.field.find(c => !G.resting(s, c)).id);
+  assert.equal(s.suspicion, 100); assert.equal(s.ship.length, 4);
+  const herd = G.herdSize(s);
+  const r = ok('beam', s.field.find(c => !G.resting(s, c)).id);
+  assert.equal(r.detail.caught, true); assert.match(r.message, /Caught!.*4 cows ran home.*3 bottles/);
+  assert.equal(s.ship.length, 0); assert.equal(G.bottleCount(s), 0);
+  assert.equal(G.herdSize(s), herd, 'no cows are lost for good');
+  assert.ok(s.field.every(c => !c.milked && !c.upgraded));
+  assert.equal(s.field.filter(c => G.resting(s, c)).length, 4, 'the cows that ran home are spooked and resting');
+  assert.equal(s.scene, 'market'); assert.equal(s.caught, 1); assert.equal(s.notices.at(-1).kind, 'caught');
+  assert.equal(s.suspicion, 50, 'fleeing drops suspicion to half, so the next beam is safe');
+  ok('travel', 'farm'); assert.equal(s.visits, 2, 'being caught costs you the rest of the visit');
+});
+
+test('when_full: block keeps the old rule, where the beam just does not fire', () => {
+  const G = require('../game/engine').withConfig({ ...base, milker: { ...base.milker, ...SAFE }, suspicion: { ...base.suspicion, when_full: 'block' } });
+  const { s, ok, no } = setup(G);
+  ok('travel', 'farm'); s.levels.cowCap = 5;
+  for (let i = 0; i < 4; i++) ok('beam', s.field.find(c => !G.resting(s, c)).id);
+  assert.match(no('beam', s.field[0].id).message, /suspicious/);
+  assert.equal(s.ship.length, 4); assert.equal(s.scene, 'farm');
+});
+
+test('a broke player is never stuck: the cat repairs for free, just slower', () => {
+  const G = rules({ break_chance: 1 }); const { s, ok, toShip } = setup(G);
+  s.coins = 4; toShip(); ok('milk');
+  assert.equal(s.milker.broken, true);
+  const r = ok('repair');
+  assert.equal(r.detail.paid, false); assert.equal(s.coins, 4, 'no coins taken');
+  assert.equal(s.milker.repairUntil, s.time + G.MILKER.free_repair_seconds);
+  assert.ok(G.MILKER.free_repair_seconds > G.MILKER.repair_seconds);
+  G.advance(s, G.MILKER.free_repair_seconds);
+  assert.equal(s.milker.broken, false);
 });

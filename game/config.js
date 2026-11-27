@@ -144,7 +144,8 @@ window.MOO_CONFIG = {
   "suspicion": {
     "per_beam": 250,
     "limit": 100,
-    "cooldown_per_second": 1.5
+    "cooldown_per_second": 1.5,
+    "when_full": "caught"
   },
   "goal": {
     "coins": 5000
@@ -156,7 +157,8 @@ window.MOO_CONFIG = {
     "break_chance": 0.05,
     "worn_break_chance": 0.2,
     "repair_cost": 15,
-    "repair_seconds": 20
+    "repair_seconds": 20,
+    "free_repair_seconds": 60
   },
   "time": {
     "offline_hours": 4

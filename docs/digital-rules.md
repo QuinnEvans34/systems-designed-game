@@ -26,6 +26,13 @@ These rules implement the game design document (high-level game flow, game items
 - A **visit** is one trip Field → Ship → Market. Leaving the Market for the Field starts the next visit. The counter sits under your coins.
 - There is **no visit limit**. In the Nov 23 play-test, visits stacked up quickly without changing how anyone played, so money became the goal instead of a visit count.
 
+## Getting caught (Game Day change)
+
+- Each beam adds suspicion (`per_beam ÷ stealth`). Suspicion cools 1.5 per second.
+- With `suspicion.when_full: caught`, a beam that would push suspicion past **100** gets you **caught**: the cows aboard run home to the field (they rest before they can be beamed again), **all milk on the ship is lost**, and you **flee to the market**, which ends the visit. Suspicion drops to **50** once you get away.
+- No cows are lost for good. Set `when_full: block` to go back to the old rule, where the beam just doesn't fire.
+- The suspicion panel warns you first: *"one more beam and you're caught!"*
+
 ## Milker maintenance (play-test change, Nov 23)
 
 The Moo-Matic milker wears out, which adds a balancing loop to milking and the game's randomness.
@@ -35,7 +42,27 @@ The Moo-Matic milker wears out, which adds a balancing loop to milking and the g
 - Each time you press MILK, the milker may **break**: **5%** chance at 50% or above (`break_chance`), **20%** under 50% (`worn_break_chance`), always at 0%. A breakdown doesn't milk the cow.
 - A broken milker can't milk until it's repaired. Press **Call Hard Hat Cat** on the ship (or **R**): it costs **15 coins** (`repair_cost`), takes **20 seconds** (`repair_seconds`), and restores the milker to 100%.
 - You can also repair early, before it breaks, as long as it's below 100%.
+- **Short on coins?** The cat still comes: the repair is free but takes **60 seconds** (`free_repair_seconds`). A broken milker can never leave you stuck.
 - Breakdowns use the save's own random numbers, so a restored backup plays out the same way.
+
+## Best result
+
+- The game remembers your best win on this device: the fewest visits to reach the goal (a faster time breaks a tie). It shows on the welcome screen, the Continue screen and the win screen.
+
+## Rule questions answered after play-testing
+
+| Question | Answer |
+| --- | --- |
+| Can I lose cows for good? | No. Cows that run home after you're caught come back to the field. |
+| Does milk spoil? | No. The ship's bottle capacity is the only limit. |
+| What happens at 5,000 coins? | You win. Keep playing, or start a new game to beat your best. |
+| Can I repair before the milker breaks? | Yes, any time it's below 100%. |
+| What if I can't afford a repair? | The Hard Hat Cat fixes it for free, but it takes 60 seconds instead of 20. |
+| Why does the beam warn me I'll be caught? | Your next beam would push suspicion past 100. Wait for it to cool, or buy stealth. |
+
+## Balance simulation
+
+`npm run simulate` plays the game automatically with five strategies and reports how many visits and minutes each needs to win, plus breakdowns, repairs and catches. Try a number without editing the settings file: `npm run simulate -- 12 goal.coins=3000 start.cows=3`.
 
 ## Cows and milk
 

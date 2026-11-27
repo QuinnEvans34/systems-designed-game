@@ -157,7 +157,14 @@ function validate(raw) {
     }
   }
   const sus = section(raw.suspicion, 'suspicion');
-  if (sus) { known(sus, 'suspicion', ['per_beam', 'limit', 'cooldown_per_second']); out.suspicion = { per_beam: num(sus, 'per_beam', 'suspicion', { min: 0 }), limit: num(sus, 'limit', 'suspicion', { above: 0 }), cooldown_per_second: num(sus, 'cooldown_per_second', 'suspicion', { min: 0 }) }; }
+  if (sus) {
+    known(sus, 'suspicion', ['per_beam', 'limit', 'cooldown_per_second', 'when_full']);
+    out.suspicion = { per_beam: num(sus, 'per_beam', 'suspicion', { min: 0 }), limit: num(sus, 'limit', 'suspicion', { above: 0 }), cooldown_per_second: num(sus, 'cooldown_per_second', 'suspicion', { min: 0 }) };
+    // when_full came from play-testing: "caught" (the farmers chase you off) or "block" (the old rule: the beam just doesn't fire).
+    const mode = sus.when_full === undefined ? 'caught' : sus.when_full;
+    if (mode !== 'caught' && mode !== 'block') fail('suspicion.when_full', `must be caught or block, not ${JSON.stringify(mode)}.`);
+    out.suspicion.when_full = mode;
+  }
   // goal and milker came from play-testing; older settings files without them get these defaults.
   const goal = raw.goal === undefined ? { coins: 5000 } : section(raw.goal, 'goal');
   if (goal) { known(goal, 'goal', ['coins']); out.goal = { coins: num(goal, 'coins', 'goal', { above: 0, int: true }) }; }
@@ -165,7 +172,7 @@ function validate(raw) {
     ? { wear_per_milking: 10, slow_below: 50, slow_multiplier: 2, break_chance: 0.05, worn_break_chance: 0.2, repair_cost: 15, repair_seconds: 20 }
     : section(raw.milker, 'milker');
   if (milker) {
-    known(milker, 'milker', ['wear_per_milking', 'slow_below', 'slow_multiplier', 'break_chance', 'worn_break_chance', 'repair_cost', 'repair_seconds']);
+    known(milker, 'milker', ['wear_per_milking', 'slow_below', 'slow_multiplier', 'break_chance', 'worn_break_chance', 'repair_cost', 'repair_seconds', 'free_repair_seconds']);
     const p = 'milker';
     out.milker = {
       wear_per_milking: num(milker, 'wear_per_milking', p, { min: 0 }),
@@ -174,7 +181,9 @@ function validate(raw) {
       break_chance: num(milker, 'break_chance', p, { min: 0 }),
       worn_break_chance: num(milker, 'worn_break_chance', p, { min: 0 }),
       repair_cost: num(milker, 'repair_cost', p, { min: 0, int: true }),
-      repair_seconds: num(milker, 'repair_seconds', p, { min: 0 })
+      repair_seconds: num(milker, 'repair_seconds', p, { min: 0 }),
+      // Without enough coins the cat still comes, just slower, so a broke player is never stuck.
+      free_repair_seconds: milker.free_repair_seconds === undefined ? 60 : num(milker, 'free_repair_seconds', p, { min: 0 })
     };
     for (const k of ['break_chance', 'worn_break_chance']) if (out.milker[k] > 1) fail(`milker.${k}`, `is a chance from 0 to 1 (0.05 = 5%), not ${out.milker[k]}.`);
     if (out.milker.slow_below > 100) fail('milker.slow_below', `is a condition from 0 to 100, not ${out.milker.slow_below}.`);

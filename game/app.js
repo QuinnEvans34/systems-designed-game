@@ -27,6 +27,16 @@
   try { guideHidden = localStorage.getItem('moo-guide-hidden') === '1'; } catch { /* storage blocked */ }
 
   /* ---------- saving, toasts, floating numbers ---------- */
+  // Best result on this device: fewest visits to reach the goal (ties go to the faster time).
+  const BEST_KEY = 'moo-ving-best';
+  function readBest() { try { const b = JSON.parse(localStorage.getItem(BEST_KEY)); return b && Number.isInteger(b.visits) && Number.isFinite(b.time) ? b : null; } catch { return null; } }
+  function recordBest(visits, time) {
+    const old = readBest(), better = !old || visits < old.visits || (visits === old.visits && time < old.time);
+    if (better) try { localStorage.setItem(BEST_KEY, JSON.stringify({ visits, time, goal: G.GOAL, at: Date.now() })); } catch { /* storage blocked */ }
+    return { better, old };
+  }
+  const clock = t => `${Math.floor(t / 60)}:${String(Math.round(t % 60)).padStart(2, '0')}`;
+  const bestText = b => `${b.visits} visit${b.visits === 1 ? '' : 's'} · ${clock(b.time)}`;
   function save() {
     // Keep the existing save untouched until the player chooses how to start.
     if (awaitingStartChoice) return;
@@ -150,6 +160,7 @@
     if (!c) { toast('Line the UFO up over a cow first. It glows when you are on target.'); return; }
     const v = field.get(c.id), result = G.act(state, 'beam', c.id);
     if (!result.ok) { toast(result.message); return; }
+    if (result.detail && result.detail.caught) { caughtScreen(result.detail); return; }
     beaming = true; v.departing = true; v.el.classList.remove('targeted', 'hopping'); v.el.classList.add('beamed');
     targetId = null;
     const saucer = $('ufo').querySelector('.saucer').getBoundingClientRect(), cow = v.el.getBoundingClientRect();
@@ -228,8 +239,9 @@
       : G.worn(s) ? `Worn: milking takes ${G.MILKER.slow_multiplier}× longer` : `${Math.round(G.breakChance(s) * 100)}% breakdown risk`;
     const why = G.reason(s, 'repair');
     $('repair-button').disabled = Boolean(why);
-    $('repair-button').title = why || `Call the Hard Hat Cat: ${G.MILKER.repair_cost} coins, ${G.MILKER.repair_seconds}s (R)`;
-    $('repair-label').textContent = fixing ? 'Repair underway' : `Call Hard Hat Cat · ${G.MILKER.repair_cost}`;
+    const price = G.repairPrice(s), secs = G.repairSeconds(s);
+    $('repair-button').title = why || `Call the Hard Hat Cat: ${price ? `${price} coins` : 'free (you are short on coins)'}, ${secs}s (R)`;
+    $('repair-label').textContent = fixing ? 'Repair underway' : price ? `Call Hard Hat Cat · ${price}` : `Free repair · ${secs}s`;
     $('repair-cat').hidden = !fixing;
     $('repair-timer').textContent = `Fixing… ${G.repairLeft(s)}s`;
   }
@@ -347,14 +359,17 @@
     for (const id of ['travel', 'supplies-hud', 'visit-hud', 'hud-right', 'save-mark']) $(id).hidden = !s.started;
     $('suspicion').hidden = !s.started || s.scene !== 'farm';
     $('welcome').hidden = s.started;
+    const best = readBest();
+    $('welcome-best').hidden = !best;
+    if (best) $('welcome-best').textContent = `★ Your best: ${G.GOAL.toLocaleString()} coins in ${bestText(best)}`;
     $('coins').textContent = compact(s.coins);
     $('bottles').textContent = `${G.bottleCount(s)}/${G.bottleCap(s)}`;
     $('visits').textContent = s.visits;
     $('visits-label').firstChild.textContent = s.won ? `★ won in ${s.wonVisits} · goal ` : 'goal ';
     $('goal-text').textContent = G.GOAL.toLocaleString();
     $('susp-mask').style.width = (1 - s.suspicion / G.SUSPICION_LIMIT) * 86.44 + '%';
-    const blocked = s.suspicion + G.beamSuspicion(s) > G.SUSPICION_LIMIT;
-    $('susp-text').textContent = `Ship ${s.ship.length}/${G.cowCap(s)} cows · ${blocked ? 'lay low, Earth is watching!' : s.ship.length >= G.cowCap(s) ? 'ship full' : 'beam ready'}`;
+    const blocked = G.overLimit(s);
+    $('susp-text').textContent = `Ship ${s.ship.length}/${G.cowCap(s)} cows · ${blocked ? (G.CAUGHT ? 'one more beam and you\'re caught!' : 'lay low, Earth is watching!') : s.ship.length >= G.cowCap(s) ? 'ship full' : 'beam ready'}`;
     $('suspicion').classList.toggle('hot', blocked);
     for (const b of document.querySelectorAll('#travel button')) {
       if (b.dataset.value === s.scene) b.setAttribute('aria-current', 'location'); else b.removeAttribute('aria-current');
@@ -451,12 +466,13 @@
   }
   function menu() {
     openDialog('menu', 'YOUR POCKET FIELD GUIDE', `<h2 id="dialog-title">How the dairy works</h2>
-      <section class="menu-row"><h3>1. Beam a cow up</h3><p>In the field, steer the UFO with the mouse or ← →. Click or press Space to beam up the cow beneath you, one at a time. Each beam raises Earth's suspicion. Your ship holds ${G.cowCap(state)} cows.</p></section>
+      <section class="menu-row"><h3>1. Beam a cow up</h3><p>In the field, steer the UFO with the mouse or ← →. Click or press Space to beam up the cow beneath you, one at a time. Each beam raises Earth's suspicion. Your ship holds ${G.cowCap(state)} cows.${G.CAUGHT ? ` If a beam would push suspicion past ${G.SUSPICION_LIMIT}, the farmers catch you: the cows aboard run home, the milk aboard spills, and you flee to the market.` : ''}</p></section>
       <section class="menu-row"><h3>2. Milk it aboard the ship</h3><p>The first cow aboard steps onto an empty milking pad when you enter the ship. Click another cow to swap it in, then press MILK. The milker covers the cow for ${G.milkTime(state)}s and makes one bottle of its milk. Inventory holds ${G.bottleCap(state)} bottles.</p></section>
       <section class="menu-row"><h3>3. Upgrade it, then send it home</h3><p>Use the cow storage monitor to drag treats onto cows. A milked or upgraded cow is exhausted. Send it home through the return chute and watch its pod fly away outside. It rests in the field for ${G.REST}s before it can be beamed again.</p></section>
       <section class="menu-row"><h3>4. Sell, buy, grow</h3><p>At the market, the left stand buys milk, the middle stand upgrades your ship, and the right stand sells new cows and treats. Your herd can hold up to ${G.HERD_MAX} cows.</p></section>
-      <section class="menu-row"><h3>5. Keep the milker running</h3><p>Every milking wears the Moo-Matic down ${G.MILKER.wear_per_milking}%. Under ${G.MILKER.slow_below}% it milks ${G.MILKER.slow_multiplier}× slower, and it can break at random, more often as it wears. Call the Hard Hat Cat (R) for ${G.MILKER.repair_cost} coins: the repair takes ${G.MILKER.repair_seconds}s.</p></section>
+      <section class="menu-row"><h3>5. Keep the milker running</h3><p>Every milking wears the Moo-Matic down ${G.MILKER.wear_per_milking}%. Under ${G.MILKER.slow_below}% it milks ${G.MILKER.slow_multiplier}× slower, and it can break at random, more often as it wears. Call the Hard Hat Cat (R) for ${G.MILKER.repair_cost} coins: the repair takes ${G.MILKER.repair_seconds}s. Short on coins? It's free, but takes ${G.MILKER.free_repair_seconds}s.</p></section>
       <section class="menu-row"><h3>How to win</h3><p>Reach ${G.GOAL.toLocaleString()} coins. A visit is one trip Field → Ship → Market; the counter shows how many it took. This is visit ${state.visits}.</p></section>
+      <section class="menu-row"><h3>Rule questions from play-testing</h3><p><b>Can I lose cows for good?</b> No. Cows that run home after you're caught come back to the field. <b>Does milk spoil?</b> No, but the ship only holds ${G.bottleCap(state)} bottles. <b>What happens at ${G.GOAL.toLocaleString()} coins?</b> You win. You can keep playing or start over to beat your best. <b>Can I repair before it breaks?</b> Yes, any time it's below 100%.</p></section>
       <section class="menu-row"><h3>Keys</h3><p>1 / 2 / 3 travel · I inventory · M milk · R repair the milker · ← → Space in the field · Esc closes windows</p></section>
       <section class="menu-row"><h3>About your dairy</h3><p>${Math.floor(state.totalTime / 60)} minutes played · ${compact(state.earned)} coins earned from milk<br>${storageOK ? 'Progress saves automatically in this browser.' : 'This browser blocked saving. Keep the tab open, or download a backup.'}</p></section>
       <div class="menu-actions"><button class="ui-button" data-action="export">Save a backup</button><button class="ui-button" data-action="import">Restore backup</button></div>
@@ -465,17 +481,32 @@
   }
 
   /* ---------- actions ---------- */
+  function caughtScreen(d) {
+    targetId = null; ufo.queued = false; ufo.keys.clear();
+    render(); save();
+    openDialog('caught', 'BUSTED!', `<h2 id="dialog-title">The farmers caught you!</h2>
+      <p>Your suspicion meter was full, so the next beam gave you away. You fled to the market.</p>
+      <section class="menu-row"><h3>What you lost</h3><p>${d.fled ? `${d.fled} cow${d.fled === 1 ? '' : 's'} ran back to the field (spooked, they rest first)` : 'No cows were aboard'} · ${d.spilled ? `${d.spilled} bottle${d.spilled === 1 ? '' : 's'} of milk spilled` : 'no milk was aboard'}.</p></section>
+      <section class="menu-row"><h3>Next time</h3><p>Watch the suspicion meter. When it says “one more beam and you're caught,” fly to your ship and let it cool down, or buy stealth at the market.</p></section>
+      <div class="menu-actions"><button class="ui-button gold" data-action="close-dialog">Back to work</button></div>`);
+  }
   function winScreen() {
     const s = state, min = Math.floor(s.wonTime / 60), sec = String(s.wonTime % 60).padStart(2, '0');
+    const { better, old } = recordBest(s.wonVisits, s.wonTime);
+    const bestRow = better
+      ? `<section class="menu-row"><h3>★ New best!</h3><p>${old ? `You beat your old best of ${bestText(old)}.` : 'Your first win on this device. Now try to beat it.'}</p></section>`
+      : `<section class="menu-row"><h3>Your best</h3><p>${bestText(old)}. So close!</p></section>`;
     openDialog('win', 'GALACTIC DAIRY CHAMPION', `<h2 id="dialog-title">You reached ${G.GOAL.toLocaleString()} coins!</h2>
       <p>Your milk empire is complete. Can you get there faster next time?</p>
       <section class="menu-row"><h3>Your result</h3><p><b>${s.wonVisits} visit${s.wonVisits === 1 ? '' : 's'}</b> · ${min}:${sec} played · ${compact(s.earned)} coins earned from milk</p></section>
+      ${bestRow}
       <div class="menu-actions"><button class="ui-button gold" data-action="close-dialog">Keep playing</button><button class="ui-button" data-action="new-game">New Game</button></div>`);
   }
   function resumeMenu() {
     openDialog('resume', 'WELCOME BACK, SPACE FARMER', `<h2 id="dialog-title">Ready to milk the galaxy?</h2>
       <p>Continue where you left off, or start a new game from the beginning.</p>
-      <section class="menu-row"><h3>Your saved dairy</h3><p>${esc(LOCATIONS[state.scene][0])} · ${compact(state.coins)} coins · ${state.field.length + state.ship.length} cows · ${G.bottleCount(state)} bottles</p></section>
+      <section class="menu-row"><h3>Your saved dairy</h3><p>${esc(LOCATIONS[state.scene][0])} · ${compact(state.coins)} coins · ${state.field.length + state.ship.length} cows · ${G.bottleCount(state)} bottles · visit ${state.visits}</p></section>
+      ${readBest() ? `<section class="menu-row"><h3>★ Your best</h3><p>${G.GOAL.toLocaleString()} coins in ${bestText(readBest())}</p></section>` : ''}
       <div class="menu-actions"><button class="ui-button gold" data-action="continue">Continue</button><button class="ui-button" data-action="new-game">New Game</button></div>
       <p>Starting a new game replaces your saved progress after confirmation.</p>`);
   }

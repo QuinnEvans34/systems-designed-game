@@ -174,7 +174,9 @@ ship_upgrades:
 # ---------------------------------------------------------------------
 suspicion:
   per_beam: 250            # each beam adds per_beam ÷ stealth (250 ÷ 10 = 25)
-  limit: 100               # a beam that would go past this is blocked
+  limit: 100               # a beam that would go past this triggers when_full
+  when_full: caught        # caught = the farmers chase you off: cows aboard run home, milk aboard is lost,
+                           #          and you flee to the market. block = the beam just doesn't fire.
   cooldown_per_second: 1.5 # how fast suspicion drops
 
 # ---------------------------------------------------------------------
@@ -195,6 +197,7 @@ milker:
   worn_break_chance: 0.2   # chance under slow_below. At 0 condition it always breaks.
   repair_cost: 15          # coins to call the Hard Hat Cat
   repair_seconds: 20       # how long the repair takes. Restores condition to 100.
+  free_repair_seconds: 60  # if you can't afford it, the cat fixes it for free but this slowly (no soft-lock)
 
 # ---------------------------------------------------------------------
 #  Time

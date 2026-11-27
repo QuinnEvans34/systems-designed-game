@@ -66,6 +66,15 @@ If something's wrong, such as a typo, a word where a number belongs, or bad inde
 
 The `demo/index.html` link opens the current game. Saves from earlier versions use separate keys. They are left alone, but this version doesn't load them.
 
+## Balance simulation
+
+```sh
+npm run simulate
+npm run simulate -- 12 goal.coins=3000 start.cows=3
+```
+
+Plays the game automatically with five strategies (Flavor first, Ship first, Big herd, Stealthy, Careless) using the real rules and your `game_config.yaml`, then prints how many visits and minutes each needs to win, plus breakdowns, repairs and times caught. Add `setting=value` pairs to try numbers without editing the file.
+
 ## Verify
 
 ```sh
@@ -83,6 +92,7 @@ node tests/scenery-smoke.cjs
 node tests/field-animation.cjs
 node tests/ambient-art.cjs
 node tests/scene-depth.cjs
+node tests/gameday-smoke.cjs
 ```
 
 An existing `playwright-core` installation can be supplied through `PLAYWRIGHT_MODULE`. Browser checks verify UI priority while targeting and abducting cows, automatic placement on the milking pad, milking, the return chute and outside pod launch, market trading, and dragging a treat onto a cow. They also cover inventory, save/resume, backup restore, reset, narrow layouts, and direct `file://` play. Screenshots go to ignored `test-results/`.

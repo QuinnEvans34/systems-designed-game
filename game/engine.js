@@ -37,6 +37,8 @@
   const START_COWS = C.start.cows;
   const SUSPICION_LIMIT = C.suspicion.limit;
   const SUSPICION_DECAY = C.suspicion.cooldown_per_second;
+  const CAUGHT = C.suspicion.when_full === 'caught';
+  const overLimit = s => s.suspicion + beamSuspicion(s) > SUSPICION_LIMIT;
   const GOAL = C.goal.coins;
   const MILKER = C.milker;
   const NAMES = ['Daisy', 'Clover', 'Mochi', 'Buttercup', 'Waffles', 'Hazel', 'Poppy', 'Biscuit', 'Maple', 'Cocoa', 'Mabel', 'Oreo', 'Pudding', 'Juniper', 'Truffle', 'Peaches', 'Nutmeg', 'Toffee', 'Sprinkles', 'Marzipan'];
@@ -80,7 +82,7 @@
     const s = {
       version: VERSION, started: false, tutorial: 'off', scene: 'farm', time: 0, totalTime: 0, savedAt: Date.now(), rng: Number(seed) >>> 0,
       coins: C.start.coins, earned: 0, nextCow: 0, suspicion: 0,
-      visits: 1, won: false, wonVisits: 0, wonTime: 0,
+      visits: 1, won: false, wonVisits: 0, wonTime: 0, caught: 0,
       milker: { condition: 100, broken: false, repairUntil: 0 },
       field: [], ship: [], pad: null, milking: null,
       bottles: zeroes(TYPES), sold: zeroes(TYPES), items: zeroes(Object.keys(ITEMS)), levels: zeroes(Object.keys(SHIP)),
@@ -100,13 +102,13 @@
       if (!c) return 'There is no cow under your beam.';
       if (resting(s, c)) return `${c.name} is resting for ${restLeft(s, c)}s more. Let the poor thing nap.`;
       if (s.ship.length >= cowCap(s)) return `Your ship is full (${cowCap(s)} cows). Milk them and send them home, or upgrade capacity at the market.`;
-      if (s.suspicion + beamSuspicion(s) > SUSPICION_LIMIT) return 'Earth is getting suspicious! Let things cool down, or upgrade your stealth.';
+      if (!CAUGHT && overLimit(s)) return 'Earth is getting suspicious! Let things cool down, or upgrade your stealth.';
     } else if (action === 'repair') {
       if (s.scene !== 'ship') return 'Head to your ship first.';
       if (repairing(s)) return `The Hard Hat Cat is already fixing the milker (${repairLeft(s)}s left).`;
       if (s.milking) return 'Wait for the milker to finish.';
       if (!s.milker.broken && s.milker.condition >= 100) return 'The milker is in top shape. No repair needed.';
-      if (s.coins < MILKER.repair_cost) return `The Hard Hat Cat charges ${MILKER.repair_cost} coins. Sell some milk first.`;
+      // Can't afford it? The cat comes anyway, for free but slower (see act), so you can never get stuck.
     } else if (['pad', 'unpad', 'milk', 'send', 'upgrade'].includes(action)) {
       if (s.scene !== 'ship') return 'Head to your ship first.';
       const id = action === 'unpad' || action === 'milk' ? s.pad : value;
@@ -170,6 +172,19 @@
       if (value === 'farm' && s.scene === 'market') { s.visits++; message = `Visit ${s.visits}. Back to Earth!`; }
       s.scene = value;
     }
+    else if (action === 'beam' && overLimit(s)) {
+      // Caught: the farmers chase the saucer off. Cows aboard run home spooked, the milk aboard is lost,
+      // and you flee to the market, which ends this visit.
+      const fled = s.ship.length, spilled = bottleCount(s);
+      for (const c of s.ship) { c.milked = c.upgraded = false; c.restUntil = s.time + REST; s.field.push(c); }
+      s.ship = []; s.pad = null; s.milking = null;
+      for (const t of TYPES) s.bottles[t] = 0;
+      // The farmers lose track of you once you flee, so suspicion drops to half (no instant re-catch).
+      s.suspicion = SUSPICION_LIMIT / 2; s.caught = (s.caught || 0) + 1; s.scene = 'market';
+      detail = { caught: true, fled, spilled };
+      message = `Caught! The farmers chased you off.${fled ? ` ${fled} cow${fled === 1 ? '' : 's'} ran home` : ''}${fled && spilled ? ' and' : ''}${spilled ? ` ${spilled} bottle${spilled === 1 ? '' : 's'} of milk spilled` : ''}${fled || spilled ? '.' : ''} You fled to the market.`;
+      notify(s, message, 'caught');
+    }
     else if (action === 'beam') {
       const c = s.field.splice(s.field.findIndex(c => c.id === value), 1)[0];
       c.milked = c.upgraded = false; c.restUntil = 0;
@@ -195,9 +210,13 @@
         message = `Milking ${c.name}…`;
       }
     } else if (action === 'repair') {
-      s.coins -= MILKER.repair_cost;
-      s.milker.repairUntil = s.time + MILKER.repair_seconds;
-      message = `The Hard Hat Cat is on the job! Back in ${MILKER.repair_seconds}s.`;
+      const paid = s.coins >= MILKER.repair_cost;
+      const secs = paid ? MILKER.repair_seconds : MILKER.free_repair_seconds;
+      if (paid) s.coins -= MILKER.repair_cost;
+      s.milker.repairUntil = s.time + secs;
+      detail = { paid, seconds: secs };
+      message = paid ? `The Hard Hat Cat is on the job! Back in ${secs}s.`
+        : `Short on coins? The Hard Hat Cat will fix it for free, but it takes ${secs}s.`;
     } else if (action === 'send') {
       const c = s.ship.splice(s.ship.findIndex(c => c.id === value), 1)[0];
       if (s.pad === c.id) s.pad = null;
@@ -282,6 +301,7 @@
     if (s.visits === undefined) s.visits = 1;
     if (s.won === undefined) { s.won = false; s.wonVisits = 0; s.wonTime = 0; }
     if (s.milker === undefined) s.milker = { condition: 100, broken: false, repairUntil: 0 };
+    if (s.caught === undefined) s.caught = 0;
     if (!Array.isArray(s.field) || !Array.isArray(s.ship)) return;
     for (const c of [...s.field, ...s.ship]) if (c && !TYPES.includes(c.type)) c.type = TYPES[0];
     if (s.milking && !TYPES.includes(s.milking.type)) s.milking.type = TYPES[0];
@@ -315,6 +335,7 @@
         if (!c || !Number.isInteger(c.id) || c.id < 0 || ids.has(c.id) || c.id >= s.nextCow || typeof c.name !== 'string' || c.name.length > 40 || !TYPES.includes(c.type) || !number(c.restUntil) || typeof c.milked !== 'boolean' || typeof c.upgraded !== 'boolean') return null;
         ids.add(c.id);
       }
+      if (!Number.isInteger(s.caught) || s.caught < 0) return null;
       if (!Number.isInteger(s.visits) || s.visits < 1 || typeof s.won !== 'boolean' || !Number.isInteger(s.wonVisits) || !number(s.wonTime)) return null;
       const mk = s.milker;
       if (!mk || typeof mk !== 'object' || !number(mk.condition, 100) || typeof mk.broken !== 'boolean' || !number(mk.repairUntil)) return null;
@@ -329,10 +350,12 @@
   }
 
   return {
-    VERSION, OFFLINE_LIMIT, SCENES, TYPES, COWS, ITEMS, SHIP, COW_PRICE, HERD_MAX, REST, SUSPICION_LIMIT, GOAL, MILKER, CONFIG: C,
+    VERSION, OFFLINE_LIMIT, SCENES, TYPES, COWS, ITEMS, SHIP, COW_PRICE, HERD_MAX, REST, SUSPICION_LIMIT, CAUGHT, GOAL, MILKER, CONFIG: C,
     createGame, act, reason, advance, offline, restore,
     level, shipValue, milkTime, cowCap, bottleCap, stealth, beamSuspicion, upgradeCost,
     bottleCount, herdSize, exhausted, resting, restLeft, milkValue, itemFor,
-    worn, repairing, repairLeft, breakChance
+    worn, repairing, repairLeft, breakChance, overLimit,
+    repairPrice: s => s.coins >= MILKER.repair_cost ? MILKER.repair_cost : 0,
+    repairSeconds: s => s.coins >= MILKER.repair_cost ? MILKER.repair_seconds : MILKER.free_repair_seconds
   };
 });

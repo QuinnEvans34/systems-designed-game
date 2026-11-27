@@ -153,8 +153,7 @@ test('ship upgrades follow the starting values, increments and cost multipliers'
 test('stealth lowers the suspicion each beam adds, and suspicion cools over time', () => {
   const s = game(); s.levels.cowCap = 7;
   beam(s, 4); assert.equal(s.suspicion, 100);
-  assert.match(no(s, 'beam', s.field[0].id).message, /suspicious/);
-  G.advance(s, 20); ok(s, 'beam', s.field[0].id);
+  G.advance(s, 20); assert.equal(G.overLimit(s), false); ok(s, 'beam', s.field[0].id);
   const t = game(); t.levels.stealth = 2; beam(t); assert.ok(t.suspicion < 12);
 });
 

@@ -683,6 +683,9 @@ body.drag-item .cow-card:not(.empty) { border-style: dashed; }
 .podium-controls button { width: 1.6cqw; height: 1.3cqw; padding: 0; border: .12cqw solid #88b7b0; background: #314f52; color: #ceffe6; font-size: 1cqw; line-height: 1; }
 .podium-controls button:disabled { opacity: .3; }
 .podium-controls button:hover:not(:disabled) { background: #49746d; }
+/* Best result on the welcome screen */
+.welcome-best { display: block; margin-top: 10px; color: #ffd36b; font-weight: 800; letter-spacing: .04em; }
+
 /* Visit counter and coin goal (play-test change) */
 .visit-hud { position: absolute; left: 2%; top: calc(2.5% + 58px); z-index: 7; padding: 4px 12px; gap: 7px; }
 .visit-hud strong { font-size: 18px; }
